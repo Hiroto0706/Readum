@@ -10,6 +10,7 @@ langchain-community = "*"
 python-dotenv = "*"
 fastapi = "*"
 uvicorn = "*"
+pytest = "*"
 
 [dev-packages]
 
