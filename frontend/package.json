@@ -23,5 +23,9 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
     "@eslint/eslintrc": "^3"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
+    "lightningcss-linux-x64-gnu": "^1.29.1"
   }
 }
