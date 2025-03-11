@@ -1,10 +1,13 @@
 export default async function Page() {
-  // const res = await fetch("http://localhost:8000/api/v1/create_question", {
-  //   method: "POST",
-  // });
-  // const payload = await res.json();
-  // const message = payload.message;
-  const message = 'Hello Plain Text'
+  const res = await fetch(
+    process.env.NEXT_PUBLIC_BASE_URL + "/create_question",
+    {
+      method: "POST",
+    }
+  );
+  const payload = await res.json();
+  const message = payload.message;
+  // const message = 'Hello Plain Text'
 
   return (
     <>
