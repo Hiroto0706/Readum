@@ -3,7 +3,7 @@ import logging
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api import router as api_router
+from src.api.endpoints import quiz_router, results_router
 
 load_dotenv()
 
@@ -23,13 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(quiz_router, prefix="/api/v1/quiz")
+app.include_router(results_router, prefix="/api/v1/results")
+
 
 @app.get("/")
 async def health_check():
     return {"status": "OK"}
 
-
-app.include_router(api_router, prefix="/api")
 
 if __name__ == "__main__":
     print("Hello Readum Project!!")
