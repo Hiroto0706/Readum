@@ -1,17 +1,18 @@
 from fastapi.testclient import TestClient
 
-from src.api.handler import router
+from src.api.endpoints.quiz import router
 
 client = TestClient(router)
 
 
 def test_create_quiz():
+    """通常の処理"""
     response = client.post(
         "/create_quiz",
         json={
             "type": "text",
             "content": "this is a test content.",
-            "difficulty": "normal",
+            "difficulty": "intermediate",
             "questionCount": 10,
         },
     )

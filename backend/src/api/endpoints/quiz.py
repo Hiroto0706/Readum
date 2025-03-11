@@ -1,8 +1,9 @@
 import logging
-from uuid import UUID
 from fastapi import APIRouter
 
-from src.api.models import Quiz, QuizOption, QuizPreview, QuizRequest, QuizResponse
+
+from src.api.models.request import QuizRequest
+from src.api.models.response import Quiz, QuizOption, QuizPreview, QuizResponse
 
 
 logger = logging.getLogger(__name__)
@@ -12,10 +13,19 @@ logger.setLevel(logging.DEBUG)
 router = APIRouter()
 
 
-@router.post("/create_quiz")
+@router.post("/create_quiz", response_model=QuizResponse)
 async def create_quiz(question_base: QuizRequest):
     """
-    Create questions from input content.
+    ユーザーが入力した条件をもとにクイズを生成する。
+
+    Args:
+        type (str): 入力タイプ（テキストorURL）
+        content (str): 読書メモまたはURL
+        difficulty (str): クイズの難易度
+        question_count (int): クイズの数
+
+    Returns:
+        QuizResponse: クイズのリスト（選択肢、解答、解説）
     """
     # TODO: 入力内容の前処理（テキストのクリーニング、チャンク化など）を実施する
 
@@ -72,17 +82,9 @@ async def create_quiz(question_base: QuizRequest):
     return quiz_response
 
 
-@router.post("/correction")
+@router.post("/correct")
 async def correction():
     """
     Correction user's answer
-    """
-    pass
-
-
-@router.get("/result/{uuid}")
-async def get_result(uuid: UUID):
-    """
-    Get user's test result
     """
     pass

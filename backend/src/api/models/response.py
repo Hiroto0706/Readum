@@ -2,17 +2,6 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
-class QuizRequest(BaseModel):
-    type: str = Field(..., description="クイズのタイプ（テキスト or URL）")
-    content: str = Field(
-        ..., description="ユーザーからの入力内容（読書メモやテストしたいサイトのURL）"
-    )
-    difficulty: str = Field(..., description="クイズの難易度")
-    question_count: int = Field(
-        ..., alias="questionCount", description="生成するクイズの数", ge=3, le=20
-    )
-
-
 class QuizOption(BaseModel):
     A: str
     B: str
@@ -28,7 +17,9 @@ class Quiz(BaseModel):
 
 
 class QuizPreview(BaseModel):
-    questions: List[Quiz] = Field(..., description="クイズのリスト")
+    questions: List[Quiz] = Field(
+        ..., description="クイズのリスト", min_length=3, max_length=20
+    )
 
 
 class QuizResponse(BaseModel):
