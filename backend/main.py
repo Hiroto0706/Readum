@@ -29,7 +29,7 @@ async def health_check():
     return {"status": "OK"}
 
 
-app.include_router(api_router, prefix="/api")
+app.include_router(api_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     print("Hello Readum Project!!")

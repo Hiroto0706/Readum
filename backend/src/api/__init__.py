@@ -1,7 +1,3 @@
-from fastapi import APIRouter
-from src.api.handler import router as api_router
+from .handler import router
 
-
-router = APIRouter()
-
-router.include_router(api_router, prefix="/v1")
+__all__ = ["router"]
