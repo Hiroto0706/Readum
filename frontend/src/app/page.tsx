@@ -1,6 +1,6 @@
 export default async function Page() {
   const res = await fetch(
-    process.env.NEXT_PUBLIC_BASE_URL + "/create_question",
+    process.env.NEXT_PUBLIC_BASE_URL + "/create_quiz",
     {
       method: "POST",
     }
