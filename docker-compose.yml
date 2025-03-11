@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: readum-backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    networks:
+      - readum-network
+
+  frontend:
+    container_name: readum-frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - readum-network
+    depends_on:
+      - backend
+
+networks:
+  readum-network:
