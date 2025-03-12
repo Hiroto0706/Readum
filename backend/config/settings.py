@@ -11,6 +11,7 @@ class AppSettings:
     ALLOW_ORIGIN: str = os.getenv("ALLOW_ORIGIN")
 
 
+# TODO: APIのバリデーションはあったほうがいい
 @dataclass(frozen=True)
 class LLMSettings:
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
@@ -39,6 +40,11 @@ class TestSettings:
 
 
 @dataclass(frozen=True)
+class ThirdPartySettings:
+    FIRECRAWL_API_KEY: str = os.getenv("FIRECRAWL_API_KEY")
+
+
+@dataclass(frozen=True)
 class Settings:
     app: AppSettings = AppSettings()
     llm: LLMSettings = LLMSettings()
@@ -46,6 +52,7 @@ class Settings:
     embeddings: EmbeddingsSettings = EmbeddingsSettings()
     text_splitter: TextSplitterSettings = TextSplitterSettings()
     test: TestSettings = TestSettings()
+    third_party: ThirdPartySettings = ThirdPartySettings()
 
 
 settings = Settings()
