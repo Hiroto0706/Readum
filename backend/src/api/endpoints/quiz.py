@@ -1,10 +1,14 @@
 import logging
 from fastapi import APIRouter
+from langchain_community.document_loaders import TextLoader
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain.chains import RetrievalQA
 
-
+from config.settings import Settings
 from src.api.models.request import QuizRequest
 from src.api.models.response import Quiz, QuizOption, QuizPreview, QuizResponse
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -28,14 +32,33 @@ async def create_quiz(question_base: QuizRequest):
         QuizResponse: クイズのリスト（選択肢、解答、解説）
     """
     # TODO: 入力内容の前処理（テキストのクリーニング、チャンク化など）を実施する
+    text_splitter = CharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
+    texts = text_splitter.split_text(question_base.content)
+
+    print(f"length of texts -> {len(texts)}")
 
     # TODO: 前処理済みテキストからFAISS用のベクトル埋め込みを生成する（Hugging Faceの埋め込み等を使用）
+    embeddings = OpenAIEmbeddings()
+
+    vectorstore = FAISS.from_texts(texts, embeddings)
+    vectorstore.save_local(Settings.embeddings.TMP_VECTORDB_PATH)
+
+    new_vectorstore = FAISS.load_local(
+        Settings.embeddings.TMP_VECTORDB_PATH,
+        embeddings,
+        allow_dangerous_deserialization=True,
+    )
 
     # TODO: FAISS検索を利用して、関連するチャンクを取得する
-
     # TODO: RAG（Retrieval-Augmented Generation）パイプラインを実装し、LLMを呼び出してテスト問題を生成する
-
+    qa = RetrievalQA.from_chain_type(
+        llm=ChatOpenAI(model=Settings.model.GPT_MODEL),
+        chain_type="stuff",
+        retriever=new_vectorstore.as_retriever(),
+    )
+    res = qa.run("確認問題のためのクイズを10問生成してください")
     # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
+    print(res)
 
     quiz_response = QuizResponse(
         preview=QuizPreview(

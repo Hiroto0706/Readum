@@ -2,3 +2,5 @@
 .env
 *__pycache__
 *.pytest_cache
+assets/*
+src/infrastructure/db/faiss/tmp/*
