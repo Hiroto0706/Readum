@@ -1,13 +1,11 @@
 import logging
 from fastapi import APIRouter
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain.chains.retrieval import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain import hub
 
 from config.settings import Settings
 from src.api.models.request import QuizRequest, QuizType
@@ -57,41 +55,43 @@ async def create_quiz(quiz_request: QuizRequest):
         embeddings,
         allow_dangerous_deserialization=True,
     )
-    retriever = new_vectorstore.as_retriever(search_kwargs={"k": 5})
+    retriever = new_vectorstore.as_retriever(search_kwargs={"k": 8})
 
     prompt_template = """
-    以下のコンテクスト情報を元に、読書メモの理解度チェックのためのクイズを{question_count}問作成してください。
-    クイズは{difficulty}の難易度で作成してください。
-    クイズはA~Dの4択にしてください。
+    以下の文脈だけを踏まえて質問に答えてください。
 
     コンテクスト:
     {context}
+
+    質問：{question}
     """
 
     prompt = ChatPromptTemplate.from_template(prompt_template)
 
-    llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL, temperature=0)
-    retrieval_qa_chat_prompt = hub.pull("langchain-ai/retrieval-qa-chat")
-    combine_docs_chain = create_stuff_documents_chain(
-        ChatOpenAI(model_name="gpt-4o-2024-05-13"), retrieval_qa_chat_prompt
-    )
-    retrieval_chain = create_retrieval_chain(
-        new_vectorstore.as_retriever(), combine_docs_chain
+    llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL).with_structured_output(
+        QuizResponse
     )
 
-    rag_chain = (
-        {
-            "context": retrieval_chain | retriever.map(),
-            "question_count": lambda _: quiz_request.question_count,
-            "difficulty": lambda _: quiz_request.difficulty,
-        }
-        | prompt
-        | llm.with_structured_output(QuizResponse)
-    )
+    rag_chain = {"question": RunnablePassthrough(), "context": retriever} | prompt | llm
     # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
     # プロンプトテンプレートを作成
 
-    res = rag_chain.invoke({})
+    question = f"""
+    以下のコンテクスト情報を元に、読書メモの理解度チェックのためのクイズを{quiz_request.question_count}問作成してください。
+
+    クイズは{quiz_request.difficulty.value}の難易度で作成してください。
+    クイズの難易度は全部で3つあります。
+    1. beginner: 初学者向けのクイズ
+    2. intermediate: 中級者向けのクイズ
+    3. advanced: 上級者向けのクイズ
+
+    クイズはA~Dの4択にしてください。
+    回答は詳細に記載してください。
+    クイズの内容はコンテキストに基づいたものにしてください。
+    感想をクイズにするのではなく、コンテキストの内容を踏まえたクイズを作成してください。ï
+    """
+
+    res = rag_chain.invoke(question)
     print(res)
 
     quiz_response = res
