@@ -63,7 +63,7 @@ async def create_quiz(quiz_request: QuizRequest):
     コンテクスト:
     {context}
 
-    質問：{question}
+    タスク：{question}
     """
 
     prompt = ChatPromptTemplate.from_template(prompt_template)
@@ -77,7 +77,7 @@ async def create_quiz(quiz_request: QuizRequest):
     # プロンプトテンプレートを作成
 
     question = f"""
-    以下のコンテクスト情報を元に、読書メモの理解度チェックのためのクイズを{quiz_request.question_count}問作成してください。
+    コンテクスト情報を元に、読書メモの理解度チェックのためのクイズを{quiz_request.question_count}問作成してください。
 
     クイズは{quiz_request.difficulty.value}の難易度で作成してください。
     クイズの難易度は全部で3つあります。
@@ -88,7 +88,8 @@ async def create_quiz(quiz_request: QuizRequest):
     クイズはA~Dの4択にしてください。
     回答は詳細に記載してください。
     クイズの内容はコンテキストに基づいたものにしてください。
-    感想をクイズにするのではなく、コンテキストの内容を踏まえたクイズを作成してください。ï
+    読書の目的といった主観的な内容はクイズにしないでください。客観的な事実だけクイズにしてください。
+    感想をクイズにするのではなく、コンテキストの内容を踏まえたクイズを作成してください。
     """
 
     res = rag_chain.invoke(question)
