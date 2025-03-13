@@ -1,16 +1,17 @@
 import logging
 from fastapi import APIRouter
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
-from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_text_splitters import CharacterTextSplitter
 from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain import hub
 
 from config.settings import Settings
 from src.api.models.request import QuizRequest, QuizType
-from src.api.models.response import Quiz, QuizOption, QuizPreview, QuizResponse
+from src.api.models.response import QuizResponse
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -56,60 +57,44 @@ async def create_quiz(quiz_request: QuizRequest):
         embeddings,
         allow_dangerous_deserialization=True,
     )
-    new_vectorstore.as_retriever().search_kwargs["k"] = 5
+    retriever = new_vectorstore.as_retriever(search_kwargs={"k": 5})
 
+    prompt_template = """
+    以下のコンテクスト情報を元に、読書メモの理解度チェックのためのクイズを{question_count}問作成してください。
+    クイズは{difficulty}の難易度で作成してください。
+    クイズはA~Dの4択にしてください。
+
+    コンテクスト:
+    {context}
+    """
+
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+
+    llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL, temperature=0)
     retrieval_qa_chat_prompt = hub.pull("langchain-ai/retrieval-qa-chat")
     combine_docs_chain = create_stuff_documents_chain(
-        ChatOpenAI(model_name=Settings.model.GPT_MODEL), retrieval_qa_chat_prompt
+        ChatOpenAI(model_name="gpt-4o-2024-05-13"), retrieval_qa_chat_prompt
     )
     retrieval_chain = create_retrieval_chain(
         new_vectorstore.as_retriever(), combine_docs_chain
     )
-    # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
-    res = retrieval_chain.invoke(
-        {"input": "理解度チェックのためのクイズを選択形式で10問生成してください。"}
+
+    rag_chain = (
+        {
+            "context": retrieval_chain | retriever.map(),
+            "question_count": lambda _: quiz_request.question_count,
+            "difficulty": lambda _: quiz_request.difficulty,
+        }
+        | prompt
+        | llm.with_structured_output(QuizResponse)
     )
+    # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
+    # プロンプトテンプレートを作成
+
+    res = rag_chain.invoke({})
     print(res)
 
-    quiz_response = QuizResponse(
-        preview=QuizPreview(
-            questions=[
-                Quiz(
-                    content="この物語の主人公は誰ですか？",
-                    options=QuizOption(
-                        A="アリス",
-                        B="ボブ",
-                        C="チャーリー",
-                        D="ダイアン",
-                    ),
-                    answer="A",
-                    explanation="物語の冒頭で主人公として描かれているのはアリスです。",
-                ),
-                Quiz(
-                    content="次のうち、著者の主張に最も近いものはどれですか？",
-                    options=QuizOption(
-                        A="技術革新は経済成長の鍵である。",
-                        B="伝統は未来を切り開く。",
-                        C="教育は社会を変革する。",
-                        D="自然との共生が最重要である。",
-                    ),
-                    answer="C",
-                    explanation="本文では、教育の持つ変革力に焦点が当てられています。",
-                ),
-                Quiz(
-                    content="この文章で筆者が最も強調している点は何ですか？",
-                    options=QuizOption(
-                        A="革新的なアイデアの重要性",
-                        B="リスク管理の方法",
-                        C="持続可能な開発",
-                        D="グローバル化の影響",
-                    ),
-                    answer="C",
-                    explanation="持続可能な開発が筆者の主張の中心にあるためです。",
-                ),
-            ]
-        )
-    )
+    quiz_response = res
 
     # TODO: 例外処理やエラーハンドリングを実装する
 
