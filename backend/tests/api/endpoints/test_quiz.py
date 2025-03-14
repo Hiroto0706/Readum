@@ -1,4 +1,6 @@
+from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
+import pytest
 
 from src.api.endpoints.quiz import router
 
@@ -56,3 +58,69 @@ def test_create_quiz():
             ]
         }
     }
+
+
+def test_create_quiz_bad_request_01():
+    """typeがtestの時、バリデーションエラーになる"""
+    with pytest.raises(RequestValidationError):
+        response = client.post(
+            "/create_quiz",
+            json={
+                "type": "test",
+                "content": "this is a test content.",
+                "difficulty": "intermediate",
+                "questionCount": 10,
+            },
+        )
+
+def test_create_quiz_bad_request_02():
+    """URLの形式が不適切な時、バリデーションエラーになる"""
+    with pytest.raises(RequestValidationError):
+        response = client.post(
+            "/create_quiz",
+            json={
+                "type": "url",
+                "content": "this is an invalid url.",
+                "difficulty": "intermediate",
+                "questionCount": 10,
+            },
+        )
+
+def test_create_quiz_bad_request_03():
+    """存在しないdifficultyの場合、バリデーションエラーになる"""
+    with pytest.raises(RequestValidationError):
+        response = client.post(
+            "/create_quiz",
+            json={
+                "type": "text",
+                "content": "this is an invalid url.",
+                "difficulty": "super_hard",
+                "questionCount": 10,
+            },
+        )
+
+def test_create_quiz_bad_request_04():
+    """questionCountが3~20以外の場合、バリデーションエラーになる"""
+    with pytest.raises(RequestValidationError):
+        response = client.post(
+            "/create_quiz",
+            json={
+                "type": "text",
+                "content": "this is an invalid url.",
+                "difficulty": "intermediate",
+                "questionCount": 2,
+            },
+        )
+
+def test_create_quiz_bad_request_05():
+    """questionCountが3~20以外の場合、バリデーションエラーになる"""
+    with pytest.raises(RequestValidationError):
+        response = client.post(
+            "/create_quiz",
+            json={
+                "type": "text",
+                "content": "this is an invalid url.",
+                "difficulty": "intermediate",
+                "questionCount": 100,
+            },
+        )

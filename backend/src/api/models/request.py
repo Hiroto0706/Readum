@@ -1,6 +1,7 @@
 from enum import Enum
 from urllib.parse import urlparse
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field
+from pydantic.dataclasses import dataclass
 
 
 class QuizType(Enum):
@@ -14,9 +15,8 @@ class Difficulty(Enum):
     ADVANCED = "advanced"
 
 
-class QuizRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
+@dataclass(config=ConfigDict(populate_by_name=True))
+class QuizRequest:
     type: QuizType = Field(..., description="クイズのタイプ（テキスト or URL）")
     content: str = Field(
         ..., description="ユーザーからの入力内容（読書メモやテストしたいサイトのURL）"
@@ -26,13 +26,13 @@ class QuizRequest(BaseModel):
         ..., alias="questionCount", description="生成するクイズの数", ge=3, le=20
     )
 
-    @field_validator("content")
-    def validate_content_for_url(cls, v: str, info) -> str:
-        type_value = info.data.get("type")
-        if type_value == QuizType.URL:
-            parsed = urlparse(v)
+    def __post_init__(self):
+        """
+        type が QuizType.URL の場合、content が有効な URL 形式かチェックします。
+        """
+        if self.type == QuizType.URL:
+            parsed = urlparse(self.content)
             if parsed.scheme not in ("http", "https") or not parsed.netloc:
                 raise ValueError(
                     "When the 'type' field is set to 'url', the 'content' field must be in a valid URL format."
                 )
-        return v

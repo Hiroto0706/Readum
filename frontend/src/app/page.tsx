@@ -7,8 +7,9 @@ export default async function Page() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: "text",
-        content: "this is a test content.",
+        type: "url",
+        content:
+          "https://monta-database.notion.site/f9257d2f834d416ab2e65397f17072a7",
         difficulty: "intermediate",
         questionCount: 10,
       }),

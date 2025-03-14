@@ -1,11 +1,10 @@
 import pytest
 from pydantic import ValidationError
-
 from src.api.models.request import QuizType, Difficulty, QuizRequest
 
 
 def test_quiz_request_valid_text():
-    """エイリアスキー "questionCount" を使用した、有効なテキストクイズデータのテスト"""
+    """エイリアスキー 'questionCount' を使用した、有効なテキストクイズデータのテスト"""
     data = {
         "type": "text",
         "content": "これはサンプルのテキストクイズの内容です。",
@@ -99,6 +98,43 @@ def test_quiz_request_invalid_url_format():
     data = {
         "type": "url",
         "content": "invalid_url",  # httpやhttps以外のスキームもしくは不正なURL
+        "difficulty": "advanced",
+        "questionCount": 5,
+    }
+    with pytest.raises(ValidationError):
+        QuizRequest(**data)
+
+
+def test_quiz_request_using_enum_fields():
+    """Enum型のインスタンスを直接渡した場合のテスト：QuizType と Difficulty"""
+    data = {
+        "type": QuizType.TEXT,  # Enumインスタンスを使用
+        "content": "Enumインスタンスを直接渡すテスト",
+        "difficulty": Difficulty.BEGINNER,  # Enumインスタンスを使用
+        "questionCount": 7,
+    }
+    quiz_request = QuizRequest(**data)
+    assert quiz_request.type == QuizType.TEXT
+    assert quiz_request.difficulty == Difficulty.BEGINNER
+
+
+def test_quiz_request_invalid_type_value():
+    """無効なQuizTypeの値を指定した場合にValidationErrorとなるテスト"""
+    data = {
+        "type": "not_a_valid_type",  # 不正な値
+        "content": "不正なタイプ値のテスト",
+        "difficulty": "advanced",
+        "questionCount": 5,
+    }
+    with pytest.raises(ValidationError):
+        QuizRequest(**data)
+
+
+def test_quiz_request_invalid_url_scheme_ftp():
+    """URLタイプの場合に、許可されていないスキーム（ftp）の場合、ValidationError が発生するテスト"""
+    data = {
+        "type": "url",
+        "content": "ftp://example.com",  # ftpスキームは許可されていない
         "difficulty": "advanced",
         "questionCount": 5,
     }

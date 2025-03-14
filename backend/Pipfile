@@ -11,6 +11,8 @@ python-dotenv = "*"
 fastapi = "*"
 uvicorn = "*"
 pytest = "*"
+faiss-cpu = "*"
+firecrawl-py = "*"
 
 [dev-packages]
 
