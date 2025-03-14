@@ -1,4 +1,7 @@
 import logging
+import os
+import uuid
+import shutil
 from fastapi import APIRouter
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -49,12 +52,24 @@ async def create_quiz(quiz_request: QuizRequest):
         documents = text_splitter.split_documents(documents)
         vectorstore = FAISS.from_documents(documents, embeddings)
 
-    vectorstore.save_local(Settings.embeddings.TMP_VECTORDB_PATH)
+    # UUIDを生成して、TMPディレクトリ内にユニークなサブディレクトリを作成する
+    unique_id = uuid.uuid4().hex
+
+    logger.info(unique_id)
+
+    unique_dir = os.path.join(Settings.embeddings.TMP_VECTORDB_PATH, unique_id)
+
+    logger.info(unique_dir)
+
+    os.makedirs(unique_dir, exist_ok=True)
+
+    vectorstore.save_local(unique_dir)
     new_vectorstore = FAISS.load_local(
-        Settings.embeddings.TMP_VECTORDB_PATH,
+        unique_dir,
         embeddings,
         allow_dangerous_deserialization=True,
     )
+
     retriever = new_vectorstore.as_retriever(search_kwargs={"k": 8})
 
     prompt_template = """
@@ -92,10 +107,13 @@ async def create_quiz(quiz_request: QuizRequest):
     感想をクイズにするのではなく、コンテキストの内容を踏まえたクイズを作成してください。
     """
 
-    res = rag_chain.invoke(question)
-    print(res)
+    try:
+        res = rag_chain.invoke(question)
+        print(res)
 
-    quiz_response = res
+        quiz_response = res
+    finally:
+        shutil.rmtree(unique_dir)
 
     # TODO: 例外処理やエラーハンドリングを実装する
 
