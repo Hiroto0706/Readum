@@ -73,12 +73,13 @@ async def create_quiz(quiz_request: QuizRequest):
     retriever = new_vectorstore.as_retriever(search_kwargs={"k": 8})
 
     prompt_template = """
-    以下の文脈だけを踏まえて質問に答えてください。
+    以下の文脈を踏まえてクエリに答えてください。
 
     コンテクスト:
     {context}
 
-    タスク：{question}
+    クエリ：
+    {query}
     """
 
     prompt = ChatPromptTemplate.from_template(prompt_template)
@@ -87,24 +88,25 @@ async def create_quiz(quiz_request: QuizRequest):
         QuizResponse
     )
 
-    rag_chain = {"question": RunnablePassthrough(), "context": retriever} | prompt | llm
+    rag_chain = {"query": RunnablePassthrough(), "context": retriever} | prompt | llm
     # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
     # プロンプトテンプレートを作成
 
     question = f"""
     コンテクスト情報を元に、読書メモの理解度チェックのためのクイズを{quiz_request.question_count}問作成してください。
 
+    ## 制約条件
     クイズは{quiz_request.difficulty.value}の難易度で作成してください。
     クイズの難易度は全部で3つあります。
     1. beginner: 初学者向けのクイズ
     2. intermediate: 中級者向けのクイズ
     3. advanced: 上級者向けのクイズ
 
-    クイズはA~Dの4択にしてください。
-    回答は詳細に記載してください。
-    クイズの内容はコンテキストに基づいたものにしてください。
-    読書の目的といった主観的な内容はクイズにしないでください。客観的な事実だけクイズにしてください。
-    感想をクイズにするのではなく、コンテキストの内容を踏まえたクイズを作成してください。
+    - クイズはA~Dの4択にしてください。
+    - 解説ではなぜこの選択肢が正解なのか、なぜ他の選択肢が不正解なのかを解説してください。
+    - クイズの内容はコンテキストに基づいたものにしてください。
+    - 読書の目的や感想といったクイズをしても意味がないものはクイズにしないでください。
+    - 感想をクイズにするのではなく、コンテキストの内容を踏まえたクイズを作成してください。
     """
 
     try:
