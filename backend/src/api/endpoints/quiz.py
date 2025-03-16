@@ -15,7 +15,6 @@ from src.api.models.request import QuizRequest, QuizType
 from src.api.models.response import QuizResponse
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 router = APIRouter()
@@ -55,11 +54,11 @@ async def create_quiz(quiz_request: QuizRequest):
     # UUIDを生成して、TMPディレクトリ内にユニークなサブディレクトリを作成する
     unique_id = uuid.uuid4().hex
 
-    print(unique_id)
+    logger.info(unique_id)
 
     unique_dir = os.path.join(Settings.embeddings.TMP_VECTORDB_PATH, unique_id)
 
-    print(unique_dir)
+    logger.info(unique_dir)
 
     os.makedirs(unique_dir, exist_ok=True)
 
@@ -99,7 +98,7 @@ async def create_quiz(quiz_request: QuizRequest):
                 "difficulty": quiz_request.difficulty.value,
             }
         )
-        print(res)
+        logger.info(res)
 
         quiz_response = res
     finally:

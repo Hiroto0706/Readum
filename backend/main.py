@@ -3,13 +3,16 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.endpoints import quiz_router, results_router
-from config.settings import settings
+from config.settings import Settings, settings
 
 load_dotenv()
 
 
+logging.basicConfig(
+    level=Settings.app.LOG_LEVEL,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 app = FastAPI()

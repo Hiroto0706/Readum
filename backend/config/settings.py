@@ -10,6 +10,10 @@ class AppSettings:
     ENV: str = os.getenv("ENV", "dev")
     ALLOW_ORIGIN: str = os.getenv("ALLOW_ORIGIN")
 
+    _DEBUG_LEV = 10
+    _INFO_LEV = 20
+    LOG_LEVEL: int = _DEBUG_LEV if ENV == "dev" else _INFO_LEV
+
 
 # TODO: APIのバリデーションはあったほうがいい
 @dataclass(frozen=True)
