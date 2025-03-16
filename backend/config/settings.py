@@ -24,6 +24,13 @@ class ModelSettings:
 
 
 @dataclass(frozen=True)
+class LangChainSettings:
+    LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY")
+    LANGCHAIN_TRACING_V2: str = os.getenv("LANGCHAIN_TRACING_V2")
+    LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT")
+
+
+@dataclass(frozen=True)
 class EmbeddingsSettings:
     TMP_VECTORDB_PATH: str = os.getenv("TMP_VECTORDB_PATH")
 
@@ -50,6 +57,7 @@ class Settings:
     llm: LLMSettings = LLMSettings()
     model: ModelSettings = ModelSettings()
     embeddings: EmbeddingsSettings = EmbeddingsSettings()
+    lang_chain: LangChainSettings = LangChainSettings()
     text_splitter: TextSplitterSettings = TextSplitterSettings()
     test: TestSettings = TestSettings()
     third_party: ThirdPartySettings = ThirdPartySettings()
