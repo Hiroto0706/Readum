@@ -56,7 +56,11 @@ async def create_quiz(quiz_request: QuizRequest):
 
     logger.info(unique_id)
 
-    unique_dir = os.path.join(Settings.embeddings.TMP_VECTORDB_PATH, unique_id)
+    unique_dir = os.path.join(
+        Settings.embeddings.TMP_VECTORDB_PATH,
+        Settings.embeddings.VECTORDB_PROVIDER,
+        unique_id,
+    )
 
     logger.info(unique_dir)
 

@@ -37,6 +37,7 @@ class LangChainSettings:
 @dataclass(frozen=True)
 class EmbeddingsSettings:
     TMP_VECTORDB_PATH: str = os.getenv("TMP_VECTORDB_PATH")
+    VECTORDB_PROVIDER: str = os.getenv("VECTORDB_PROVIDER")
 
 
 @dataclass(frozen=True)

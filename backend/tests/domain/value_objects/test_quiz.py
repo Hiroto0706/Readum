@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from src.domain.value_objects.quiz import (
+from src.domain.value_objects.quiz_content import (
     QuizContent,
     QuizType,
     QuizTypeEnum,
