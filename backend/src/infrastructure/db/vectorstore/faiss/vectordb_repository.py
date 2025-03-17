@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from backend.src.domain.repositories.vectordb_interface import VectorStoreHandler
+from src.domain.repositories.vectordb_interface import VectorStoreHandler
 
 
 class VectorStoreHandlerImpl(VectorStoreHandler):

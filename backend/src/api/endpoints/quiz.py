@@ -6,11 +6,11 @@ import shutil
 from fastapi import APIRouter
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langsmith import Client
 
 from config.settings import Settings
+from src.infrastructure.embeddings.embeddings import EmbeddingsModelImpl
 from src.api.models.request import QuizRequest, QuizType
 from src.api.models.response import QuizResponse
 
@@ -34,22 +34,26 @@ async def create_quiz(quiz_request: QuizRequest):
     Returns:
         QuizResponse: クイズのリスト（選択肢、解答、解説）
     """
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
+    text_splitter = CharacterTextSplitter(
+        chunk_size=Settings.text_splitter.CHUNK_SIZE,
+        chunk_overlap=Settings.text_splitter.CHUNK_OVERLAP,
+    )
+
+    embeddings_model = EmbeddingsModelImpl(
+        _model=embeddings, _text_splitter=text_splitter
+    )
 
     if quiz_request.type == QuizType.TEXT:
-        text_splitter = CharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
-        texts = text_splitter.split_text(quiz_request.content)
-
-        # ベクトルストア作成
-        vectorstore = FAISS.from_texts(texts, embeddings)
+        doc_text = embeddings_model.text_to_doc(quiz_request.content)
+        splitted_doc = embeddings_model.text_split(doc_text)
     elif quiz_request.type == QuizType.URL:
-        loader = FireCrawlLoader(
-            url=quiz_request.content, mode="scrape", params={"onlyMainContent": True}
-        )
-        documents = loader.load()
-        text_splitter = CharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
-        documents = text_splitter.split_documents(documents)
-        vectorstore = FAISS.from_documents(documents, embeddings)
+        url: str = quiz_request.content
+        embeddings_model = embeddings_model.set_document_loader(url)
+        documents = embeddings_model.load_document()
+        splitted_doc = embeddings_model.text_split(documents)
+
+    embeddings_model = embeddings_model.set_vectorstore(splitted_doc)
 
     # UUIDを生成して、TMPディレクトリ内にユニークなサブディレクトリを作成する
     unique_id = uuid.uuid4().hex
@@ -66,7 +70,8 @@ async def create_quiz(quiz_request: QuizRequest):
 
     os.makedirs(unique_dir, exist_ok=True)
 
-    vectorstore.save_local(unique_dir)
+    embeddings_model.save_inmemory(unique_dir)
+
     new_vectorstore = FAISS.load_local(
         unique_dir,
         embeddings,
