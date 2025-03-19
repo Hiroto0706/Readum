@@ -11,6 +11,9 @@ python-dotenv = "*"
 fastapi = "*"
 uvicorn = "*"
 pytest = "*"
+faiss-cpu = "*"
+firecrawl-py = "*"
+langsmith = "*"
 
 [dev-packages]
 
