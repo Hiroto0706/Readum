@@ -1,9 +1,7 @@
 import logging
 import shutil
-from sys import exc_info
 from typing import List
 from urllib.parse import urlparse
-from langchain_core.document_loaders import BaseLoader
 from langchain_openai import OpenAIEmbeddings
 from pydantic.dataclasses import dataclass
 from langchain_text_splitters.base import TextSplitter
@@ -11,6 +9,7 @@ from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from src.domain.repositories.embeddings_interface import EmbeddingsModel
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
+from langchain_core.vectorstores import VectorStoreRetriever
 
 logger = logging.getLevelName(__name__)
 
@@ -99,6 +98,16 @@ class EmbeddingsModelImpl(EmbeddingsModel):
             raise RuntimeError(
                 f"An error occurred while saving the vectorstore to {target_path}."
             ) from e
+
+    def create_retriever(self, target_path: str) -> VectorStoreRetriever:
+        """FAISSのリトリーバーを返す関数"""
+        new_vectorstore = FAISS.load_local(
+            target_path,
+            self._model,
+            allow_dangerous_deserialization=True,
+        )
+        retriever = new_vectorstore.as_retriever(search_kwargs={"k": 8})
+        return retriever
 
     def cleanup(self, target_path: str) -> None:
         """target_path配下のFAISSインデックスを削除する"""

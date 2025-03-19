@@ -1,15 +1,13 @@
 import logging
-from operator import itemgetter
 import os
 import uuid
-import shutil
 from fastapi import APIRouter
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import CharacterTextSplitter
 from langsmith import Client
 
 from config.settings import Settings
+from src.infrastructure.rag_agent.rag_agent import RAGAgentModelImpl
 from src.infrastructure.embeddings.embeddings import EmbeddingsModelImpl
 from src.api.models.request import QuizRequest, QuizType
 from src.api.models.response import QuizResponse
@@ -63,6 +61,7 @@ async def create_quiz(quiz_request: QuizRequest):
     unique_dir = os.path.join(
         Settings.embeddings.TMP_VECTORDB_PATH,
         Settings.embeddings.VECTORDB_PROVIDER,
+        "tmp",
         unique_id,
     )
 
@@ -72,50 +71,26 @@ async def create_quiz(quiz_request: QuizRequest):
 
     embeddings_model.save_inmemory(unique_dir)
 
-    new_vectorstore = FAISS.load_local(
-        unique_dir,
-        embeddings,
-        allow_dangerous_deserialization=True,
-    )
-    retriever = new_vectorstore.as_retriever(search_kwargs={"k": 8})
-
     client = Client(api_key=Settings.lang_chain.LANGCHAIN_API_KEY)
     prompt = client.pull_prompt("readum-system-prompt")
+    llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
+    rag_agent = RAGAgentModelImpl(llm, prompt)
 
-    llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL).with_structured_output(
-        QuizResponse
-    )
-
-    rag_chain = (
-        {
-            "question_count": itemgetter("question_count"),
-            "difficulty": itemgetter("difficulty"),
-            "input": itemgetter("input"),
-            "context": itemgetter("input") | retriever,
-        }
-        | prompt
-        | llm
-    )
+    rag_agent = rag_agent.set_rag_chain(embeddings_model.create_retriever(unique_dir))
     # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
     # プロンプトテンプレートを作成
 
     try:
-        res = rag_chain.invoke(
-            {
-                "input": "Please generate the quiz according to the above instructions.",
-                "question_count": quiz_request.question_count,
-                "difficulty": quiz_request.difficulty.value,
-            }
+        res = rag_agent.invoke_chain(
+            question_count=quiz_request.question_count,
+            difficulty=quiz_request.difficulty.value,
         )
-        logger.info(res)
-
-        quiz_response = res
     finally:
         embeddings_model.cleanup(unique_dir)
 
     # TODO: 例外処理やエラーハンドリングを実装する
 
-    return quiz_response
+    return res
 
 
 @router.post("/correct")

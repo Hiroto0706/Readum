@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List
 from langchain_text_splitters.base import TextSplitter
-from pydantic import ConfigDict, Field
+from pydantic import Field
 from pydantic.dataclasses import dataclass
 from langchain_core.embeddings import Embeddings
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
-from langchain_core.vectorstores import VectorStore
+from langchain_core.vectorstores import VectorStore, VectorStoreRetriever
 
 
 @dataclass(frozen=True, config=dict(arbitrary_types_allowed=True))
@@ -52,6 +52,11 @@ class EmbeddingsModel(ABC):
     @abstractmethod
     def save_inmemory(self, target_path: str) -> None:
         """インメモリのベクトルストアにベクトルデータを保存する"""
+        pass
+
+    @abstractmethod
+    def create_retriever(self, target_path: str) -> VectorStoreRetriever:
+        """RetrieverとなるVectorDBを生成する関数"""
         pass
 
     @abstractmethod
