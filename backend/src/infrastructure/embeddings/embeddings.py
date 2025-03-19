@@ -1,4 +1,6 @@
 import logging
+import shutil
+from sys import exc_info
 from typing import List
 from urllib.parse import urlparse
 from langchain_core.document_loaders import BaseLoader
@@ -92,8 +94,23 @@ class EmbeddingsModelImpl(EmbeddingsModel):
             self._vectorstore.save_local(target_path)
         except Exception as e:
             logger.error(
-                f"Failed to save vectorstore to '{target_path}': {e}", exc_info=True
+                f"Failed to save vectorstore to {target_path}: {e}", exc_info=True
             )
             raise RuntimeError(
-                f"An error occurred while saving the vectorstore to '{target_path}'."
+                f"An error occurred while saving the vectorstore to {target_path}."
             ) from e
+
+    def cleanup(self, target_path: str) -> None:
+        """target_path配下のFAISSインデックスを削除する"""
+        try:
+            shutil.rmtree(target_path)
+        except FileNotFoundError as e:
+            logger.warn(
+                f"The target directory '{target_path}' was not found: {e}",
+                exc_info=True,
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to cleanup vectorstore at '{target_path}': {e}", exc_info=True
+            )
+            raise RuntimeError(f"Failed to cleanup vectorstore at {target_path}") from e

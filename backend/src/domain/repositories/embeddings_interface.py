@@ -50,6 +50,11 @@ class EmbeddingsModel(ABC):
         pass
 
     @abstractmethod
-    def save_inmemory(self) -> None:
+    def save_inmemory(self, target_path: str) -> None:
         """インメモリのベクトルストアにベクトルデータを保存する"""
+        pass
+
+    @abstractmethod
+    def cleanup(self, target_path: str) -> None:
+        """インメモリをクリーンアップする関数"""
         pass

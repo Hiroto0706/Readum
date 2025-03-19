@@ -111,7 +111,7 @@ async def create_quiz(quiz_request: QuizRequest):
 
         quiz_response = res
     finally:
-        shutil.rmtree(unique_dir)
+        embeddings_model.cleanup(unique_dir)
 
     # TODO: 例外処理やエラーハンドリングを実装する
 
