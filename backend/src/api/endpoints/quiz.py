@@ -4,13 +4,17 @@ import uuid
 from fastapi import APIRouter
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.document_loaders.firecrawl import FireCrawlLoader
+from langchain_community.vectorstores import FAISS
 from langsmith import Client
-
+from src.infrastructure.database_file_handler import DBFileHandlerImpl
+from src.infrastructure.vectordb import VectorStoreHandlerImpl
+from src.infrastructure.doc_creator import DocumentCreatorImpl
 from config.settings import Settings
-from src.infrastructure.rag_agent.rag_agent import RAGAgentModelImpl
-from src.infrastructure.embeddings.embeddings import EmbeddingsModelImpl
+from src.infrastructure.rag_agent import RAGAgentModelImpl
 from src.api.models.request import QuizRequest, QuizType
 from src.api.models.response import QuizResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,51 +36,42 @@ async def create_quiz(quiz_request: QuizRequest):
     Returns:
         QuizResponse: クイズのリスト（選択肢、解答、解説）
     """
-    embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
     text_splitter = CharacterTextSplitter(
         chunk_size=Settings.text_splitter.CHUNK_SIZE,
         chunk_overlap=Settings.text_splitter.CHUNK_OVERLAP,
     )
 
-    embeddings_model = EmbeddingsModelImpl(
-        _model=embeddings, _text_splitter=text_splitter
-    )
-
     if quiz_request.type == QuizType.TEXT:
-        doc_text = embeddings_model.text_to_doc(quiz_request.content)
-        splitted_doc = embeddings_model.text_split(doc_text)
+        document_creator = DocumentCreatorImpl(_text_splitter=text_splitter)
+        document = document_creator.translate_str_into_doc(quiz_request.content)
     elif quiz_request.type == QuizType.URL:
-        url: str = quiz_request.content
-        embeddings_model = embeddings_model.set_document_loader(url)
-        documents = embeddings_model.load_document()
-        splitted_doc = embeddings_model.text_split(documents)
+        document_loader = FireCrawlLoader(
+            url=quiz_request.content, mode="scrape", params={"onlyMainContent": True}
+        )
+        document_creator = DocumentCreatorImpl(document_loader, text_splitter)
+        document = document_creator.load_document()
 
-    embeddings_model = embeddings_model.set_vectorstore(splitted_doc)
-
-    # UUIDを生成して、TMPディレクトリ内にユニークなサブディレクトリを作成する
-    unique_id = uuid.uuid4().hex
-
-    logger.info(unique_id)
-
-    unique_dir = os.path.join(
-        Settings.embeddings.TMP_VECTORDB_PATH,
-        Settings.embeddings.VECTORDB_PROVIDER,
-        "tmp",
-        unique_id,
+    # ベクトルDBにドキュメントを保存する
+    splitted_doc = document_creator.split_document(document)
+    embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
+    vector_store_handler = VectorStoreHandlerImpl(
+        embeddings, FAISS.from_documents(splitted_doc, embeddings)
     )
 
-    logger.info(unique_dir)
+    db_file_handler = DBFileHandlerImpl()
+    directory_path = db_file_handler.create_unique_directory()
 
-    os.makedirs(unique_dir, exist_ok=True)
-
-    embeddings_model.save_inmemory(unique_dir)
+    # ベクトルDBにデータを保存
+    vector_store_handler.save_local(directory_path)
 
     client = Client(api_key=Settings.lang_chain.LANGCHAIN_API_KEY)
     prompt = client.pull_prompt("readum-system-prompt")
     llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
     rag_agent = RAGAgentModelImpl(llm, prompt)
 
-    rag_agent = rag_agent.set_rag_chain(embeddings_model.create_retriever(unique_dir))
+    rag_agent = rag_agent.set_rag_chain(
+        vector_store_handler.as_retriever(directory_path)
+    )
     # TODO: Pydanticなどを利用して、生成されたテスト問題をパース・検証する
     # プロンプトテンプレートを作成
 
@@ -85,12 +80,11 @@ async def create_quiz(quiz_request: QuizRequest):
             question_count=quiz_request.question_count,
             difficulty=quiz_request.difficulty.value,
         )
+        return QuizResponse(id=db_file_handler.get_unique_id(), preview=res)
     finally:
-        embeddings_model.cleanup(unique_dir)
+        db_file_handler.delete_unique_directory()
 
     # TODO: 例外処理やエラーハンドリングを実装する
-
-    return res
 
 
 @router.post("/correct")

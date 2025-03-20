@@ -6,10 +6,11 @@ from langchain_openai import OpenAIEmbeddings
 from pydantic.dataclasses import dataclass
 from langchain_text_splitters.base import TextSplitter
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
-from src.domain.repositories.embeddings_interface import EmbeddingsModel
+from src.domain.repositories.embeddings_repository import EmbeddingsModel
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_core.vectorstores import VectorStoreRetriever
+
 
 logger = logging.getLevelName(__name__)
 

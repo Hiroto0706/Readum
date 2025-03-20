@@ -28,4 +28,5 @@ class QuizPreview:
 
 @dataclass(frozen=True)
 class QuizResponse:
+    id: str = Field(..., description="Quizを識別するための一意のID")
     preview: QuizPreview = Field(..., description="クイズのプレビュー")

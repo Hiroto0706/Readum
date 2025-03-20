@@ -4,8 +4,8 @@ from langchain_openai import ChatOpenAI
 from pydantic.dataclasses import dataclass
 from typing import Any
 from langchain_core.vectorstores import VectorStoreRetriever
-from src.api.models.response import QuizResponse
-from src.domain.repositories.rag_agent_interface import RAGAgentModel
+from src.api.models.response import QuizPreview
+from src.domain.repositories.rag_agent_repository import RAGAgentModel
 
 
 logger = logging.getLogger(__name__)
@@ -29,11 +29,11 @@ class RAGAgentModelImpl(RAGAgentModel):
                 "context": itemgetter("input") | retriever,
             }
             | self._prompt
-            | self._llm.with_structured_output(QuizResponse)
+            | self._llm.with_structured_output(QuizPreview)
         )
         return RAGAgentModelImpl(self._llm, self._prompt, rag_chain)
 
-    def invoke_chain(self, question_count: int, difficulty: str):
+    def invoke_chain(self, question_count: int, difficulty: str) -> "QuizPreview":
         """RAG Chainの実装"""
         try:
             response = self._rag_chain.invoke(
