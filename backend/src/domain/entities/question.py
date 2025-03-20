@@ -1,17 +1,18 @@
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
-from src.api.models.request import QuizType
-from src.domain.value_objects.question_count import QuestionCount
-from src.domain.value_objects.quiz_content import QuizContent
-from src.domain.value_objects.quiz_difficulty import QuizDifficulty
+
+@dataclass(frozen=True)
+class QuizOption:
+    A: str
+    B: str
+    C: str
+    D: str
 
 
 @dataclass(frozen=True)
 class Question:
-    content: QuizContent = Field(..., description="クイズの内容")
-    quiz_type: QuizType = Field(..., description="クイズのタイプ（text または url）")
-    difficulty: QuizDifficulty = Field(
-        ..., description="クイズの難易度（beginner, intermediate, advanced）"
-    )
-    question_count: QuestionCount = Field(..., description="生成するクイズの数")
+    content: str = Field(..., description="質問内容")
+    options: QuizOption = Field(..., description="選択肢")
+    answer: str = Field(..., description="正解の選択肢")
+    explanation: str = Field(..., description="解答の説明")

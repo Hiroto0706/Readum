@@ -1,6 +1,4 @@
 import logging
-import os
-import uuid
 from fastapi import APIRouter
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
