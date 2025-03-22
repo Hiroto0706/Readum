@@ -1,11 +1,25 @@
 from pydantic.dataclasses import dataclass
 
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.document_loaders.firecrawl import FireCrawlLoader
+from langchain_community.vectorstores import FAISS
+from langsmith import Client
+
+from src.api.models.quiz import Difficulty, QuizResponse, QuizType
+from src.infrastructure.llm.rag_agent import RAGAgentModelImpl
+from src.infrastructure.db.vectordb import VectorStoreHandlerImpl
+from src.infrastructure.file_system.database_file_handler import DBFileHandlerImpl
+from src.infrastructure.llm.doc_creator import DocumentCreatorImpl
+
+from config.settings import Settings
+
 
 @dataclass(frozen=True)
 class QuizCreator:
-    # TODO: クイズの生成に必要なプロパティは全てここに書く
-
-    def create_quiz():
+    def create_quiz(
+        quiz_type: QuizType, content: str, question_count: int, difficulty: Difficulty
+    ) -> QuizResponse:
         """
         基本的にクイズを生成するフローをここで管理することにする。
 
@@ -19,22 +33,48 @@ class QuizCreator:
         4. Chainの実行
         """
 
-        # TODO: 入力からDocument型のリストを生成する。（Text or URL）
-        ### TODO: textかurlかを判断し、Documentを生成するためのインスタンスを作成する
-        ### TODO: Documentのリストを生成する関数を叩く
+        text_splitter = CharacterTextSplitter(
+            chunk_size=Settings.text_splitter.CHUNK_SIZE,
+            chunk_overlap=Settings.text_splitter.CHUNK_OVERLAP,
+        )
 
-        # TODO: インデックス化し、ベクトルDBにぶちこむ
-        ### TODO: ベクトルDBのインスタンスを生成する
-        ### TODO: ドキュメントをベクトル化する
-        ### TODO: UUIDを生成する
-        ### TODO: 保存するベクトルDBのパスを決定する
-        ### TODO: ベクトルデータをベクトルDBに保存する
+        if quiz_type == QuizType.TEXT:
+            document_creator = DocumentCreatorImpl(text_splitter=text_splitter)
+            document = document_creator.translate_str_into_doc(content)
+        elif quiz_type == QuizType.URL:
+            document_loader = FireCrawlLoader(
+                url=content,
+                mode="scrape",
+                params={"onlyMainContent": True},
+            )
+            document_creator = DocumentCreatorImpl(document_loader, text_splitter)
+            document = document_creator.load_document()
 
-        # TODO: RAG Chainの生成を行う
-        ### TODO: プロンプトをpullする
-        ### TODO: モデルのインスタンスを作成する
-        ### TODO: retrieverのインスタンス作成
-        ### TODO: RAG Chainの生成
+        # ベクトルDBにドキュメントを保存する
+        splitted_doc = document_creator.split_document(document)
+        embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
+        vector_store_handler = VectorStoreHandlerImpl(
+            embeddings, FAISS.from_documents(splitted_doc, embeddings)
+        )
 
-        # TODO: Chainの実装を行う
-        pass
+        db_file_handler = DBFileHandlerImpl()
+        try:
+            directory_path = db_file_handler.create_unique_directory()
+            vector_store_handler.save_local(directory_path)
+
+            client = Client(api_key=Settings.lang_chain.LANGCHAIN_API_KEY)
+            prompt = client.pull_prompt("readum-system-prompt")
+            llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
+            rag_agent = RAGAgentModelImpl(llm, prompt)
+
+            rag_agent = rag_agent.set_rag_chain(
+                vector_store_handler.as_retriever(directory_path)
+            )
+
+            res = rag_agent.invoke_chain(
+                question_count=question_count,
+                difficulty=difficulty.value,
+            )
+            return QuizResponse(id=db_file_handler.get_unique_id(), preview=res)
+        finally:
+            db_file_handler.delete_unique_directory()

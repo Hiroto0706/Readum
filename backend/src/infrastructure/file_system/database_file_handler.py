@@ -4,10 +4,11 @@ import shutil
 import uuid
 from pydantic.dataclasses import dataclass
 
-from config.settings import Settings
-from src.application.services.database_file_handler_repository import (
+from src.application.interface.database_file_handler import (
     DBFileHandler,
 )
+
+from config.settings import Settings
 
 logger = logging.getLogger(__name__)
 

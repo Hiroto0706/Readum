@@ -1,11 +1,13 @@
 import logging
 from operator import itemgetter
-from langchain_openai import ChatOpenAI
-from pydantic.dataclasses import dataclass
 from typing import Any
+from pydantic.dataclasses import dataclass
+
 from langchain_core.vectorstores import VectorStoreRetriever
+from langchain_openai import ChatOpenAI
+
 from src.domain.entities.quiz import Quiz
-from src.application.interface.rag_agent import RAGAgentModel
+from src.domain.service.rag_agent import RAGAgentModel
 
 
 logger = logging.getLogger(__name__)

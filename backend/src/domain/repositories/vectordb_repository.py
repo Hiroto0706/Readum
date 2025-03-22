@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pydantic import Field
+
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore, VectorStoreRetriever
 

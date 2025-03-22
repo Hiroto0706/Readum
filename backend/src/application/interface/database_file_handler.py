@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 import uuid
+from abc import ABC, abstractmethod
+
 from pydantic.dataclasses import dataclass
 
 

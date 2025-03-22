@@ -1,10 +1,12 @@
-from pydantic.dataclasses import dataclass
 import logging
 from typing import List
+from pydantic.dataclasses import dataclass
+
 from langchain_community.vectorstores import FAISS
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
+
 from src.domain.repositories.vectordb_repository import VectorStoreHandler
 
 

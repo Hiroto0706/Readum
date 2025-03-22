@@ -4,6 +4,7 @@ from pydantic import Field
 from pydantic.dataclasses import dataclass
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.vectorstores import VectorStoreRetriever
+
 from src.domain.entities.quiz import Quiz
 
 
