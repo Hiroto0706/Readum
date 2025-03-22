@@ -3,11 +3,12 @@ from typing import List
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
-from langchain_text_splitters import TextSplitter
+from langchain_text_splitters import CharacterTextSplitter, TextSplitter
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
 
 from src.domain.service.doc_creator import DocumentCreator
+from config.settings import Settings
 
 
 logger = logging.getLevelName(__name__)
@@ -21,7 +22,11 @@ class DocumentCreatorImpl(DocumentCreator):
         default=None, description="ドキュメントロードインスタンス"
     )
     text_splitter: TextSplitter = Field(
-        ..., description="テキストスプリッターインスタンス"
+        default_factory=lambda: CharacterTextSplitter(
+            chunk_size=Settings.text_splitter.CHUNK_SIZE,
+            chunk_overlap=Settings.text_splitter.CHUNK_OVERLAP,
+        ),
+        description="テキストスプリッターインスタンス",
     )
 
     def translate_str_into_doc(self, text: str) -> List[Document]:

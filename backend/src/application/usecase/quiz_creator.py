@@ -1,11 +1,10 @@
 from pydantic.dataclasses import dataclass
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from langchain_community.vectorstores import FAISS
-from langsmith import Client
 
+from backend.src.application.service.llm_service import get_prompt_from_hub
 from src.api.models.quiz import Difficulty, QuizResponse, QuizType
 from src.infrastructure.llm.rag_agent import RAGAgentModelImpl
 from src.infrastructure.db.vectordb import VectorStoreHandlerImpl
@@ -32,14 +31,8 @@ class QuizCreator:
 
         4. Chainの実行
         """
-
-        text_splitter = CharacterTextSplitter(
-            chunk_size=Settings.text_splitter.CHUNK_SIZE,
-            chunk_overlap=Settings.text_splitter.CHUNK_OVERLAP,
-        )
-
         if quiz_type == QuizType.TEXT:
-            document_creator = DocumentCreatorImpl(text_splitter=text_splitter)
+            document_creator = DocumentCreatorImpl()
             document = document_creator.translate_str_into_doc(content)
         elif quiz_type == QuizType.URL:
             document_loader = FireCrawlLoader(
@@ -47,10 +40,9 @@ class QuizCreator:
                 mode="scrape",
                 params={"onlyMainContent": True},
             )
-            document_creator = DocumentCreatorImpl(document_loader, text_splitter)
+            document_creator = DocumentCreatorImpl(document_loader)
             document = document_creator.load_document()
 
-        # ベクトルDBにドキュメントを保存する
         splitted_doc = document_creator.split_document(document)
         embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
         vector_store_handler = VectorStoreHandlerImpl(
@@ -62,8 +54,7 @@ class QuizCreator:
             directory_path = db_file_handler.create_unique_directory()
             vector_store_handler.save_local(directory_path)
 
-            client = Client(api_key=Settings.lang_chain.LANGCHAIN_API_KEY)
-            prompt = client.pull_prompt("readum-system-prompt")
+            prompt = get_prompt_from_hub()
             llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
             rag_agent = RAGAgentModelImpl(llm, prompt)
 
