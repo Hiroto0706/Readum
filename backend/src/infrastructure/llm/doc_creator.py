@@ -5,7 +5,7 @@ from pydantic.dataclasses import dataclass
 from langchain_text_splitters.base import TextSplitter
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
-from src.domain.repositories.doc_creator_repository import DocumentCreator
+from src.application.interface.doc_creator import DocumentCreator
 
 
 logger = logging.getLevelName(__name__)

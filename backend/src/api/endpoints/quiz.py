@@ -5,11 +5,11 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from langchain_community.vectorstores import FAISS
 from langsmith import Client
-from src.infrastructure.database_file_handler import DBFileHandlerImpl
-from src.infrastructure.vectordb import VectorStoreHandlerImpl
-from src.infrastructure.doc_creator import DocumentCreatorImpl
+from src.infrastructure.file_system.database_file_handler import DBFileHandlerImpl
+from src.infrastructure.db.vectordb import VectorStoreHandlerImpl
+from src.infrastructure.llm.doc_creator import DocumentCreatorImpl
 from config.settings import Settings
-from src.infrastructure.rag_agent import RAGAgentModelImpl
+from src.infrastructure.llm.rag_agent import RAGAgentModelImpl
 from src.api.models.request import QuizRequest, QuizType
 from src.api.models.response import QuizResponse
 

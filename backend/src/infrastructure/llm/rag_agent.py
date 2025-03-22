@@ -5,7 +5,7 @@ from pydantic.dataclasses import dataclass
 from typing import Any
 from langchain_core.vectorstores import VectorStoreRetriever
 from src.domain.entities.quiz import Quiz
-from src.domain.repositories.rag_agent_repository import RAGAgentModel
+from src.application.interface.rag_agent import RAGAgentModel
 
 
 logger = logging.getLogger(__name__)

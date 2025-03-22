@@ -1,12 +1,11 @@
 import logging
 import os
 import shutil
-from typing import Self
 import uuid
 from pydantic.dataclasses import dataclass
 
 from config.settings import Settings
-from src.domain.repositories.database_file_handler_repository import (
+from src.application.services.database_file_handler_repository import (
     DBFileHandler,
 )
 
