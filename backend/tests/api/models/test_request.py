@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
-from src.api.models.request import QuizType, Difficulty, QuizRequest
+
+from src.api.models.quiz import Difficulty, QuizRequest, QuizType
 
 
 def test_quiz_request_valid_text():

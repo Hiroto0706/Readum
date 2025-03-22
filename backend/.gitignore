@@ -3,4 +3,4 @@
 *__pycache__
 *.pytest_cache
 assets/document.txt
-src/infrastructure/db/vectorstore/*/tmp/*
+assets/tmp/*

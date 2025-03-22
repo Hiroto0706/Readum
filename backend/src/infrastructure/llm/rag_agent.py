@@ -1,11 +1,13 @@
 import logging
 from operator import itemgetter
-from langchain_openai import ChatOpenAI
-from pydantic.dataclasses import dataclass
 from typing import Any
+from pydantic.dataclasses import dataclass
+
 from langchain_core.vectorstores import VectorStoreRetriever
-from src.api.models.response import QuizResponse
-from src.domain.repositories.rag_agent_interface import RAGAgentModel
+from langchain_openai import ChatOpenAI
+
+from src.domain.entities.quiz import Quiz
+from src.domain.service.rag_agent import RAGAgentModel
 
 
 logger = logging.getLogger(__name__)
@@ -29,11 +31,11 @@ class RAGAgentModelImpl(RAGAgentModel):
                 "context": itemgetter("input") | retriever,
             }
             | self._prompt
-            | self._llm.with_structured_output(QuizResponse)
+            | self._llm.with_structured_output(Quiz)
         )
         return RAGAgentModelImpl(self._llm, self._prompt, rag_chain)
 
-    def invoke_chain(self, question_count: int, difficulty: str):
+    def invoke_chain(self, question_count: int, difficulty: str) -> "Quiz":
         """RAG Chainの実装"""
         try:
             response = self._rag_chain.invoke(

@@ -1,4 +1,3 @@
-from typing import List
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
@@ -12,20 +11,8 @@ class QuizOption:
 
 
 @dataclass(frozen=True)
-class Quiz:
+class Question:
     content: str = Field(..., description="質問内容")
     options: QuizOption = Field(..., description="選択肢")
     answer: str = Field(..., description="正解の選択肢")
     explanation: str = Field(..., description="解答の説明")
-
-
-@dataclass(frozen=True)
-class QuizPreview:
-    questions: List[Quiz] = Field(
-        ..., description="クイズのリスト", min_length=3, max_length=20
-    )
-
-
-@dataclass(frozen=True)
-class QuizResponse:
-    preview: QuizPreview = Field(..., description="クイズのプレビュー")

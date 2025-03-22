@@ -888,12 +888,13 @@ CEOは高給取りが多い。それは彼らにレバレッジがあるから�
   );
   const payload = await res.json();
   const quiz_content = payload.preview;
-
+  console.log(payload.id);
   console.log(quiz_content);
 
   return (
     <>
       Hello World.<br></br>
+      <p className="text-h1">{payload.id}</p>
       {quiz_content.questions.map((quiz: any, index: number) => (
         <div key={index}>
           quizContent: {quiz.content}
