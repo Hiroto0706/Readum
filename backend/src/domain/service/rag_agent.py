@@ -12,8 +12,8 @@ from src.domain.entities.quiz import Quiz
 class RAGAgentModel(ABC):
     """RAGを実装実装し、クイズを生成するための抽象モデル"""
 
-    _llm: BaseChatModel = Field(..., description="LLMモデル")
-    _prompt: Any = Field(..., description="プロンプトテンプレート")
+    llm: BaseChatModel = Field(..., description="LLMモデル")
+    prompt: Any = Field(..., description="プロンプトテンプレート")
     _rag_chain: Any = Field(default=None, description="RAG Chain", init=False)
 
     @abstractmethod

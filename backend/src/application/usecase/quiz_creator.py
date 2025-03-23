@@ -1,11 +1,12 @@
+import logging
 from pydantic.dataclasses import dataclass
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from langchain_community.vectorstores import FAISS
 
-from backend.src.application.service.llm_service import get_prompt_from_hub
 from src.api.models.quiz import Difficulty, QuizResponse, QuizType
+from src.application.service.llm_service import get_prompt_from_hub
 from src.infrastructure.llm.rag_agent import RAGAgentModelImpl
 from src.infrastructure.db.vectordb import VectorStoreHandlerImpl
 from src.infrastructure.file_system.database_file_handler import DBFileHandlerImpl
@@ -14,10 +15,17 @@ from src.infrastructure.llm.doc_creator import DocumentCreatorImpl
 from config.settings import Settings
 
 
+logger = logging.getLogger(__name__)
+
+
 @dataclass(frozen=True)
 class QuizCreator:
     def create_quiz(
-        quiz_type: QuizType, content: str, question_count: int, difficulty: Difficulty
+        self,
+        quiz_type: QuizType,
+        content: str,
+        question_count: int,
+        difficulty: Difficulty,
     ) -> QuizResponse:
         """
         クイズを生成する関数
@@ -58,5 +66,8 @@ class QuizCreator:
                 difficulty=difficulty.value,
             )
             return QuizResponse(id=db_file_handler.get_unique_id(), preview=res)
+        except Exception as e:
+            logger.error(f"予期せぬエラーが発生しました: {e}")
+            raise
         finally:
             db_file_handler.delete_unique_directory()

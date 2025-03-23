@@ -7,7 +7,7 @@ from langchain_core.vectorstores import VectorStore, VectorStoreRetriever
 
 class VectorStoreHandler(ABC):
     _embeddings_model: Embeddings = Field(..., description="埋め込みモデル")
-    _vectorstore: VectorStore = Field(
+    vectorstore: VectorStore = Field(
         default=None, description="ベクトルストアインスタンス"
     )
 

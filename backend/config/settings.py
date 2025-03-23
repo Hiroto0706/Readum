@@ -38,6 +38,7 @@ class LangChainSettings:
 class EmbeddingsSettings:
     TMP_VECTORDB_PATH: str = os.getenv("TMP_VECTORDB_PATH")
     VECTORDB_PROVIDER: str = os.getenv("VECTORDB_PROVIDER")
+    SEARCH_KWARGS: int = os.getenv("SEARCH_KWARGS", 8)
 
 
 @dataclass(frozen=True)

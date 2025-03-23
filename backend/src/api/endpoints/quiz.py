@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/create_quiz", response_model=QuizResponse)
-async def create_quiz(quiz_request: QuizRequest, quiz_creator=Depends(QuizCreator())):
+async def create_quiz(quiz_request: QuizRequest):
     """
     ユーザーが入力した条件をもとにクイズを生成する。
 
@@ -25,6 +25,7 @@ async def create_quiz(quiz_request: QuizRequest, quiz_creator=Depends(QuizCreato
     Returns:
         QuizResponse: クイズのリスト（選択肢、解答、解説）
     """
+    quiz_creator = QuizCreator()
     res: QuizResponse = quiz_creator.create_quiz(
         quiz_request.type,
         quiz_request.content,
