@@ -20,16 +20,7 @@ class QuizCreator:
         quiz_type: QuizType, content: str, question_count: int, difficulty: Difficulty
     ) -> QuizResponse:
         """
-        基本的にクイズを生成するフローをここで管理することにする。
-
-        1. 入力を受け取り、テキストスプリットを行う
-        →URLの時はFireCrawlを使ってスクレイピングを行う
-
-        2. ベクトルDBに埋め込む
-
-        3. RAG Chainを作成する
-
-        4. Chainの実行
+        クイズを生成する関数
         """
         if quiz_type == QuizType.TEXT:
             document_creator = DocumentCreatorImpl()
