@@ -14,7 +14,7 @@ class RAGAgentModel(ABC):
 
     llm: Final[BaseChatModel] = Field(..., description="LLMモデル")
     prompt: Final[Any] = Field(..., description="プロンプトテンプレート")
-    _rag_chain: Final[Any] = Field(default=None, description="RAG Chain", init=False)
+    rag_chain: Final[Any] = Field(default=None, description="RAG Chain", init=False)
 
     @abstractmethod
     def set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":

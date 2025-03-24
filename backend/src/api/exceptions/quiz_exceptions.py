@@ -34,15 +34,19 @@ def handle_application_exception(exception):
         RAGProcessingError,
     )
 
-    if isinstance(exception, ValueError):
-        return BadRequestError(str(exception))
-    elif isinstance(exception, InvalidInputError):
-        return BadRequestError(str(exception))
-    elif isinstance(exception, DocumentProcessingError):
-        return BadRequestError(str(exception))
-    elif isinstance(exception, VectorStoreOperationError):
-        return InternalServerError(str(exception))
-    elif isinstance(exception, RAGProcessingError):
-        return InternalServerError(str(exception))
-    else:
-        return InternalServerError(f"Unexpected error: {str(exception)}")
+    # 例外タイプとHTTP例外のマッピングを定義
+    exception_mapping = {
+        ValueError: lambda e: BadRequestError(str(e)),
+        InvalidInputError: lambda e: BadRequestError(str(e)),
+        DocumentProcessingError: lambda e: BadRequestError(str(e)),
+        VectorStoreOperationError: lambda e: InternalServerError(str(e)),
+        RAGProcessingError: lambda e: InternalServerError(str(e)),
+    }
+
+    # 例外タイプに基づいて適切なHTTP例外を返す
+    for exc_type, handler in exception_mapping.items():
+        if isinstance(exception, exc_type):
+            return handler(exception)
+
+    # マッピングにない例外はInternalServerErrorとして扱う
+    return InternalServerError(f"Unexpected error: {str(exception)}")

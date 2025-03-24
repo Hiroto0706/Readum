@@ -25,7 +25,7 @@ class RAGAgentModelImpl(RAGAgentModel):
 
     llm: ChatOpenAI
     prompt: Any
-    _rag_chain: Any
+    rag_chain: Any
 
     def set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":
         """RAGを実行するためのChainを生成する"""
@@ -49,13 +49,13 @@ class RAGAgentModelImpl(RAGAgentModel):
 
     def invoke_chain(self, question_count: int, difficulty: str) -> "Quiz":
         """RAG Chainの実装"""
-        if not self._rag_chain:
+        if not self.rag_chain:
             error_msg = "RAG chain is not initialized. Call set_rag_chain first."
             logger.error(error_msg)
             raise RAGChainExecutionError(error_msg)
 
         try:
-            response = self._rag_chain.invoke(
+            response = self.rag_chain.invoke(
                 {
                     # FIXME: 一旦inputは固定値としておく
                     "input": "Please generate the quiz according to the above instructions.",

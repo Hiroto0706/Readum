@@ -14,7 +14,7 @@ from src.application.exceptions.quiz_creation_exceptions import (
 )
 from src.application.service.llm_service import get_prompt_from_hub
 from src.infrastructure.llm.rag_agent import RAGAgentModelImpl
-from src.infrastructure.db.vectordb import VectorStoreHandlerImpl
+from src.infrastructure.db.vectordb import VectorStoreHandlerImpl, get_faiss_index
 from src.infrastructure.file_system.database_file_handler import DBFileHandlerImpl
 from src.infrastructure.llm.doc_creator import DocumentCreatorImpl
 from src.infrastructure.exceptions.vectordb_exceptions import (
@@ -83,38 +83,19 @@ class QuizCreator:
         directory_path = None
 
         try:
+            # ドキュメント処理
             try:
-                if quiz_type == QuizType.TEXT:
-                    document_creator = DocumentCreatorImpl()
-                    document = document_creator.translate_str_into_doc(content)
-                elif quiz_type == QuizType.URL:
-                    document_loader = FireCrawlLoader(
-                        url=content,
-                        mode="scrape",
-                        params={"onlyMainContent": True},
-                    )
-                    document_creator = DocumentCreatorImpl(document_loader)
-                    document = document_creator.load_document()
-
-                splitted_doc = document_creator.split_document(document)
-
+                document, splitted_doc = self._process_document(quiz_type, content)
             except Exception as e:
                 error_msg = f"Failed to process document: {str(e)}"
                 logger.error(error_msg, exc_info=True)
-                raise DocumentProcessingError(error_msg)
+                raise DocumentProcessingError(error_msg) from e
 
+            # ベクトルストア操作
             try:
-                embeddings = OpenAIEmbeddings(
-                    model=Settings.model.TEXT_EMBEDDINGS_MODEL
+                vector_store_handler, directory_path = self._setup_vector_store(
+                    splitted_doc, db_file_handler
                 )
-                vector_store_handler = VectorStoreHandlerImpl(
-                    embeddings_model=embeddings,
-                    vectorstore=FAISS.from_documents(splitted_doc, embeddings),
-                )
-
-                directory_path = db_file_handler.create_unique_directory()
-                vector_store_handler.save_local(directory_path)
-
             except (
                 VectorStoreCreationError,
                 VectorStoreSaveError,
@@ -122,31 +103,22 @@ class QuizCreator:
                 DirectoryCreationError,
             ) as e:
                 error_msg = f"Vector store operation failed: {str(e)}"
-                logger.error(error_msg)
-                raise VectorStoreOperationError(error_msg)
-
+                logger.error(error_msg, exc_info=True)
+                raise VectorStoreOperationError(error_msg) from e
             except Exception as e:
                 error_msg = f"Unexpected error during vector store operation: {str(e)}"
                 logger.error(error_msg, exc_info=True)
-                raise VectorStoreOperationError(error_msg)
+                raise VectorStoreOperationError(error_msg) from e
 
+            # RAG処理
             try:
-                prompt = get_prompt_from_hub()
-                llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
-                rag_agent = RAGAgentModelImpl(llm=llm, prompt=prompt, _rag_chain=None)
-
-                retriever = vector_store_handler.as_retriever(directory_path)
-                rag_agent = rag_agent.set_rag_chain(retriever)
-
-                rag_response = rag_agent.invoke_chain(
-                    question_count=question_count,
-                    difficulty=difficulty.value,
+                return self._process_rag(
+                    vector_store_handler,
+                    directory_path,
+                    question_count,
+                    difficulty,
+                    db_file_handler,
                 )
-
-                return QuizResponse(
-                    id=db_file_handler.get_unique_id(), preview=rag_response
-                )
-
             except (
                 RAGChainSetupError,
                 RAGChainExecutionError,
@@ -154,19 +126,77 @@ class QuizCreator:
                 VectorStoreLoadError,
             ) as e:
                 error_msg = f"RAG processing failed: {str(e)}"
-                logger.error(error_msg)
-                raise RAGProcessingError(error_msg)
-
+                logger.error(error_msg, exc_info=True)
+                raise RAGProcessingError(error_msg) from e
             except Exception as e:
                 error_msg = f"Unexpected error during RAG processing: {str(e)}"
                 logger.error(error_msg, exc_info=True)
-                raise RAGProcessingError(error_msg)
+                raise RAGProcessingError(error_msg) from e
 
         finally:
-            if directory_path:
-                try:
-                    db_file_handler.delete_unique_directory()
-                except DirectoryDeletionError as e:
-                    logger.warning(f"Failed to clean up directory: {str(e)}")
-                except Exception as e:
-                    logger.warning(f"Unexpected error during cleanup: {str(e)}")
+            # リソース解放
+            self._cleanup_resources(directory_path, db_file_handler)
+
+    def _process_document(self, quiz_type, content):
+        """ドキュメント処理を行うヘルパーメソッド"""
+        document_creator = DocumentCreatorImpl()
+
+        if quiz_type == QuizType.TEXT:
+            document = document_creator.translate_str_into_doc(content)
+        elif quiz_type == QuizType.URL:
+            document_loader = FireCrawlLoader(
+                url=content,
+                mode="scrape",
+                params={"onlyMainContent": True},
+            )
+            document_creator = DocumentCreatorImpl(document_loader)
+            document = document_creator.load_document()
+
+        splitted_doc = document_creator.split_document(document)
+        return document, splitted_doc
+
+    def _setup_vector_store(self, splitted_doc, db_file_handler):
+        """ベクトルストアのセットアップを行うヘルパーメソッド"""
+        embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
+        vector_store_handler = VectorStoreHandlerImpl(
+            embeddings_model=embeddings,
+            vectorstore=get_faiss_index(splitted_doc, embeddings),
+        )
+
+        directory_path = db_file_handler.create_unique_directory()
+        vector_store_handler.save_local(directory_path)
+
+        return vector_store_handler, directory_path
+
+    def _process_rag(
+        self,
+        vector_store_handler,
+        directory_path,
+        question_count,
+        difficulty,
+        db_file_handler,
+    ):
+        """RAG処理を行うヘルパーメソッド"""
+        prompt = get_prompt_from_hub()
+        llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
+        rag_agent = RAGAgentModelImpl(llm=llm, prompt=prompt, rag_chain=None)
+
+        retriever = vector_store_handler.as_retriever(directory_path)
+        rag_agent = rag_agent.set_rag_chain(retriever)
+
+        rag_response = rag_agent.invoke_chain(
+            question_count=question_count,
+            difficulty=difficulty.value,
+        )
+
+        return QuizResponse(id=db_file_handler.get_unique_id(), preview=rag_response)
+
+    def _cleanup_resources(self, directory_path, db_file_handler):
+        """リソース解放を行うヘルパーメソッド"""
+        if directory_path:
+            try:
+                db_file_handler.delete_unique_directory()
+            except DirectoryDeletionError as e:
+                logger.warning(f"Failed to clean up directory: {str(e)}")
+            except Exception as e:
+                logger.warning(f"Unexpected error during cleanup: {str(e)}")

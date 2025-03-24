@@ -24,6 +24,11 @@ from config.settings import Settings
 logger = logging.getLogger(__name__)
 
 
+def get_faiss_index(doc: List[Document], embeddings: OpenAIEmbeddings) -> FAISS:
+    """FAISSインデックスのインスタンスを返す関数"""
+    return FAISS.from_documents(doc, embeddings)
+
+
 @dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class VectorStoreHandlerImpl(VectorStoreHandler):
     """
