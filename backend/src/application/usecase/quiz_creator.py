@@ -6,7 +6,7 @@ from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 from langchain_community.vectorstores import FAISS
 
 from src.api.models.quiz import Difficulty, QuizResponse, QuizType
-from src.application.exceptions.llm_exceptions import (
+from src.application.exceptions.quiz_creation_exceptions import (
     DocumentProcessingError,
     InvalidInputError,
     RAGProcessingError,
