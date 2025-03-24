@@ -24,12 +24,9 @@ from src.infrastructure.exceptions.vectordb_exceptions import (
     InvalidDocumentError,
 )
 from src.infrastructure.exceptions.llm_exceptions import (
-    DocumentLoadError,
-    DocumentSplitException,
     LLMResponseParsingError,
     RAGChainExecutionError,
     RAGChainSetupError,
-    TranslationError,
 )
 from src.infrastructure.exceptions.file_system_exceptions import (
     DirectoryCreationError,
