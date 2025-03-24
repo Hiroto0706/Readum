@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Final
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -12,9 +12,9 @@ from src.domain.entities.quiz import Quiz
 class RAGAgentModel(ABC):
     """RAGを実装実装し、クイズを生成するための抽象モデル"""
 
-    llm: BaseChatModel = Field(..., description="LLMモデル")
-    prompt: Any = Field(..., description="プロンプトテンプレート")
-    _rag_chain: Any = Field(default=None, description="RAG Chain", init=False)
+    llm: Final[BaseChatModel] = Field(..., description="LLMモデル")
+    prompt: Final[Any] = Field(..., description="プロンプトテンプレート")
+    _rag_chain: Final[Any] = Field(default=None, description="RAG Chain", init=False)
 
     @abstractmethod
     def set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":
