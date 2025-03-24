@@ -1,18 +1,19 @@
 import uuid
 from abc import ABC, abstractmethod
 
+from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 
 
-@dataclass(frozen=True, config=dict(arbitrary_types_allowed=True))
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class DBFileHandler(ABC):
     """DBのインデックスのファイル操作を行うモデルの規定クラス"""
 
-    _unique_id: str = uuid.uuid4().hex
+    unique_id: str = uuid.uuid4().hex
 
     @abstractmethod
     def get_unique_id(self) -> str:
-        return self._unique_id
+        return self.unique_id
 
     @abstractmethod
     def _create_unique_dir_path(unique_id: str):

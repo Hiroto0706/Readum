@@ -1,6 +1,6 @@
 import logging
 from typing import List
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
 from langchain_text_splitters import CharacterTextSplitter, TextSplitter
@@ -8,13 +8,19 @@ from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
 
 from src.domain.service.doc_creator import DocumentCreator
+from src.infrastructure.exceptions.llm_exceptions import (
+    DocumentLoadError,
+    DocumentSplitException,
+    TranslationError,
+)
+
 from config.settings import Settings
 
 
-logger = logging.getLevelName(__name__)
+logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, config=dict(arbitrary_types_allowed=True))
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class DocumentCreatorImpl(DocumentCreator):
     """ドキュメントの生成を行うクラスの抽象クラス"""
 
@@ -31,22 +37,42 @@ class DocumentCreatorImpl(DocumentCreator):
 
     def translate_str_into_doc(self, text: str) -> List[Document]:
         """str型の文字列をDocument型に変換する関数"""
-        texts = self.text_splitter.split_text(text)
-        documents = [
-            Document(page_content=txt, metadata={"source": "text"}) for txt in texts
-        ]
-        return documents
+        try:
+            texts = self.text_splitter.split_text(text)
+            documents = [
+                Document(page_content=txt, metadata={"source": "text"}) for txt in texts
+            ]
+            return documents
+        except Exception as e:
+            error_msg = f"Failed to translate string to document: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            raise TranslationError(error_msg)
 
     def load_document(self) -> List[Document]:
         """対象のドキュメントを読み込む関数"""
         try:
             documents = self.document_loader.load()
+            return documents
         except Exception as e:
-            logger.error(logger.error(f"Failed to load document : {e}", exc_info=True))
-            raise RuntimeError(f"Failed to load document.") from e
-        return documents
+            error_msg = f"Failed to load document: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            raise DocumentLoadError(error_msg)
 
     def split_document(self, document: List[Document]) -> List[Document]:
         """受け取ったドキュメントを分割する関数"""
-        splitted_document = self.text_splitter.split_documents(document)
-        return splitted_document
+        if not document:
+            logger.warning("Empty document list provided for splitting")
+            return []
+
+        try:
+            splitted_document = self.text_splitter.split_documents(document)
+
+            return splitted_document
+        except ValueError as e:
+            error_msg = f"Invalid document format for splitting: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            raise DocumentSplitException(error_msg)
+        except Exception as e:
+            error_msg = f"Failed to split document: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            raise DocumentSplitException(error_msg)

@@ -1,10 +1,8 @@
-from enum import Enum
 from typing import Any
 
 from langsmith import Client
-from langchain_core.language_models import BaseChatModel
 
-from backend.config.settings import Settings
+from config.settings import Settings
 
 
 SYSTEM_PROMPT_TITLE = "readum-system-prompt"

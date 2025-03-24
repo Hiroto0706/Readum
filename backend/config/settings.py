@@ -1,3 +1,4 @@
+from typing import Final
 from dotenv import load_dotenv
 from pydantic.dataclasses import dataclass
 import os
@@ -7,53 +8,58 @@ load_dotenv()
 
 @dataclass(frozen=True)
 class AppSettings:
-    ENV: str = os.getenv("ENV", "dev")
-    ALLOW_ORIGIN: str = os.getenv("ALLOW_ORIGIN")
+    ENV: Final[str] = os.getenv("ENV", "dev")
+    ALLOW_ORIGIN: Final[str] = os.getenv("ALLOW_ORIGIN")
 
-    _DEBUG_LEV = 10
-    _INFO_LEV = 20
-    LOG_LEVEL: int = _DEBUG_LEV if ENV == "dev" else _INFO_LEV
+    DEBUG_LEV = 10
+    INFO_LEV = 20
+    LOG_LEVEL: Final[int] = DEBUG_LEV if ENV == "dev" else INFO_LEV
 
 
 # TODO: APIのバリデーションはあったほうがいい
 @dataclass(frozen=True)
 class LLMSettings:
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPENAI_API_KEY: Final[str] = os.getenv("OPENAI_API_KEY")
+
+    def __post_init__(self):
+        if not self.OPENAI_API_KEY:
+            raise ValueError("OPENAI_API_KEY is not set")
 
 
 @dataclass(frozen=True)
 class ModelSettings:
-    GPT_MODEL: str = os.getenv("GPT_MODEL")
-    TEXT_EMBEDDINGS_MODEL: str = os.getenv("TEXT_EMBEDDINGS_MODEL")
+    GPT_MODEL: Final[str] = os.getenv("GPT_MODEL")
+    TEXT_EMBEDDINGS_MODEL: Final[str] = os.getenv("TEXT_EMBEDDINGS_MODEL")
 
 
 @dataclass(frozen=True)
 class LangChainSettings:
-    LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY")
-    LANGCHAIN_TRACING_V2: str = os.getenv("LANGCHAIN_TRACING_V2")
-    LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT")
+    LANGCHAIN_API_KEY: Final[str] = os.getenv("LANGCHAIN_API_KEY")
+    LANGCHAIN_TRACING_V2: Final[str] = os.getenv("LANGCHAIN_TRACING_V2")
+    LANGCHAIN_PROJECT: Final[str] = os.getenv("LANGCHAIN_PROJECT")
 
 
 @dataclass(frozen=True)
 class EmbeddingsSettings:
-    TMP_VECTORDB_PATH: str = os.getenv("TMP_VECTORDB_PATH")
-    VECTORDB_PROVIDER: str = os.getenv("VECTORDB_PROVIDER")
+    TMP_VECTORDB_PATH: Final[str] = os.getenv("TMP_VECTORDB_PATH")
+    VECTORDB_PROVIDER: Final[str] = os.getenv("VECTORDB_PROVIDER")
+    SEARCH_KWARGS: Final[int] = int(os.getenv("SEARCH_KWARGS", 8))
 
 
 @dataclass(frozen=True)
 class TextSplitterSettings:
-    CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", 2000))
-    CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", 100))
+    CHUNK_SIZE: Final[int] = int(os.getenv("CHUNK_SIZE", 2000))
+    CHUNK_OVERLAP: Final[int] = int(os.getenv("CHUNK_OVERLAP", 100))
 
 
 @dataclass(frozen=True)
 class TestSettings:
-    DOC_PATH: str = os.getenv("DOC_PATH")
+    DOC_PATH: Final[str] = os.getenv("DOC_PATH")
 
 
 @dataclass(frozen=True)
 class ThirdPartySettings:
-    FIRECRAWL_API_KEY: str = os.getenv("FIRECRAWL_API_KEY")
+    FIRECRAWL_API_KEY: Final[str] = os.getenv("FIRECRAWL_API_KEY")
 
 
 @dataclass(frozen=True)

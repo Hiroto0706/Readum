@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Final
 from pydantic import Field
 
 from langchain_core.embeddings import Embeddings
@@ -6,8 +7,8 @@ from langchain_core.vectorstores import VectorStore, VectorStoreRetriever
 
 
 class VectorStoreHandler(ABC):
-    _embeddings_model: Embeddings = Field(..., description="埋め込みモデル")
-    _vectorstore: VectorStore = Field(
+    embeddings_model: Final[Embeddings] = Field(..., description="埋め込みモデル")
+    vectorstore: Final[VectorStore] = Field(
         default=None, description="ベクトルストアインスタンス"
     )
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List
-from pydantic import Field
+from typing import Final, List
+from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
 from langchain_core.document_loaders import BaseLoader
@@ -8,14 +8,14 @@ from langchain_core.documents import Document
 from langchain_text_splitters.base import TextSplitter
 
 
-@dataclass(frozen=True, config=dict(arbitrary_types_allowed=True))
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class DocumentCreator(ABC):
     """ドキュメントの生成を行うクラスの抽象クラス"""
 
-    _document_loader: BaseLoader = Field(
+    document_loader: Final[BaseLoader] = Field(
         default=None, description="ドキュメントロードインスタンス"
     )
-    _text_splitter: TextSplitter = Field(
+    text_splitter: Final[TextSplitter] = Field(
         ..., description="テキストスプリッターインスタンス"
     )
 
