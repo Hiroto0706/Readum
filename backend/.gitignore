@@ -4,3 +4,4 @@
 *.pytest_cache
 assets/document.txt
 assets/tmp/*
+credential.json
