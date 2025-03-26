@@ -51,3 +51,33 @@ class GCSClient:
 
         logger.info(f"Saved quiz submission to gs://{self.bucket_name}/{blob_name}")
         return blob_name
+
+    def get_result(self, quiz_id: str):
+        """
+        uuidをもとにCloud Storageからユーザーの回答を取得する
+
+        Args:
+          uuid(str): uuid
+
+        Returns:
+          TODO: あとで書く
+        """
+        try:
+            blobs = list(self.bucket.list_blobs(prefix=quiz_id))
+
+            if not blobs:
+                logger.warning(f"No submission found for quiz_id: {quiz_id}")
+                return None
+
+            latest_blob = sorted(blobs, key=lambda x: x.name, reverse=True)[0]
+
+            content = latest_blob.download_as_text()
+
+            submission_data = json.loads(content)
+
+            logger.info(f"Retrieved quiz submission from {latest_blob.name}")
+            return submission_data
+
+        except Exception as e:
+            logger.error(f"Failed to retrieve quiz submission: {str(e)}")
+            raise

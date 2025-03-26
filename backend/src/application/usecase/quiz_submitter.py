@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from src.application.exceptions.quiz_submit_exception import (
+from src.application.exceptions.quiz_submit_exceptions import (
     SaveObjectToStorageError,
 )
 from src.infrastructure.storage.gcs_client import GCSClient

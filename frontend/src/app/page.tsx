@@ -73,7 +73,7 @@ export default function Page() {
     try {
       // Server Actionの呼び出し
       const response = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + "/quiz/create_quiz",
+        process.env.NEXT_PUBLIC_API_URL + "/quiz/create_quiz",
         {
           method: "POST",
           headers: {
@@ -144,7 +144,7 @@ export default function Page() {
       };
 
       // APIを呼び出し
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/quiz/submit`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/quiz/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

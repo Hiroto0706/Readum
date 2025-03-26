@@ -1,4 +1,5 @@
 import logging
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -39,8 +40,8 @@ from config.settings import Settings
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
-class QuizCreator:
+# TODO: 初期値としてquizという値を受け取るようにする
+class QuizCreator(BaseModel):
     def create_quiz(
         self,
         quiz_type: QuizType,
