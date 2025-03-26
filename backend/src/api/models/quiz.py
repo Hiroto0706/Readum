@@ -2,7 +2,7 @@ import inspect
 from typing import List
 from enum import Enum
 from urllib.parse import urlparse
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.dataclasses import dataclass
 
 
@@ -69,8 +69,7 @@ class QuizResponse:
     preview: Quiz = Field(..., description="クイズのプレビュー")
 
 
-@dataclass(frozen=True)
-class UserAnswer:
+class UserAnswer(BaseModel):
     id: str = Field(..., description="Quizを識別するための一意のID")
     preview: Quiz = Field(..., description="クイズのプレビュー")
     selected_options: List[str] = Field(
@@ -78,14 +77,15 @@ class UserAnswer:
     )
 
     @field_validator("selected_options")
-    def validate_selected_options(cls, v, values):
+    def validate_selected_options(cls, v, info):
         """
         回答の数がクイズの数と一致する
         各回答がA,B,C,Dのいずれかであることを保証する
         """
-        if "preview" in values and len(v) != len(values["preview"].questions):
+        preview: Quiz = info.data.get("preview")
+        if preview and len(v) != len(preview.questions):
             raise ValueError(
-                f"選択された回答の数({len(v)})がクイズの問題数({len(values['preview'].questions)})と一致しません"
+                f"選択された回答の数({len(v)})がクイズの問題数({len(preview.questions)})と一致しません"
             )
 
         valid_options = set(inspect.signature(Options).parameters.keys())

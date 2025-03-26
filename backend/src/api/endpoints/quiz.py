@@ -1,6 +1,7 @@
 import logging
 from fastapi import APIRouter
 
+from src.application.usecase.quiz_submitter import QuizSubmitter
 from src.api.exceptions.quiz_exceptions import handle_application_exception
 from src.application.usecase.quiz_creator import QuizCreator
 from src.api.models.quiz import QuizResponse, QuizRequest, UserAnswer
@@ -60,4 +61,16 @@ async def submit_answer(user_answer: UserAnswer):
         difficulty (Difficulty): クイズの難易度
         question_count (int): クイズの数
     """
-    pass
+    # TODO: submit処理の実装
+    try:
+        quiz_submitter: QuizSubmitter = QuizSubmitter(user_answer)
+        quiz_submitter.save_object_to_storage()
+        return
+
+    except ValueError as e:
+        logger.error(f"Invalid input value: {str(e)}", exc_info=True)
+        raise handle_application_exception(e)
+
+    except Exception as e:
+        logger.error(f"Error creating quiz: {str(e)}", exc_info=True)
+        raise handle_application_exception(e)

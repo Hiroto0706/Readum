@@ -33,6 +33,9 @@ def handle_application_exception(exception):
         VectorStoreOperationError,
         RAGProcessingError,
     )
+    from src.application.exceptions.quiz_submit_exception import (
+        SaveObjectToStorageError,
+    )
 
     # 例外タイプとHTTP例外のマッピングを定義
     exception_mapping = {
@@ -41,6 +44,7 @@ def handle_application_exception(exception):
         DocumentProcessingError: lambda e: BadRequestError(str(e)),
         VectorStoreOperationError: lambda e: InternalServerError(str(e)),
         RAGProcessingError: lambda e: InternalServerError(str(e)),
+        SaveObjectToStorageError: lambda e: InternalServerError(str(e)),
     }
 
     # 例外タイプに基づいて適切なHTTP例外を返す

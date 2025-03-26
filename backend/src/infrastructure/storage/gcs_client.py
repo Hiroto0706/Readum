@@ -1,8 +1,7 @@
 import json
 import logging
+from typing import Any
 from google.cloud import storage
-
-from src.domain.entities.results import UserAnswer
 
 from config.settings import Settings
 
@@ -30,8 +29,7 @@ class GCSClient:
             logger.info(f"Bucket {bucket_name} does not exist. Creating...")
             self.bucket = self.storage_client.create_bucket(bucket_name)
 
-    # TODO: 引数の型定義を行う
-    def save_quiz_submission(self, quiz_id: str, submission_data: UserAnswer):
+    def save_quiz_submission(self, quiz_id: str, submission_data: Any):
         """
         クイズの回答をGCSに保存します。
 
