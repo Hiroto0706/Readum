@@ -1,3 +1,4 @@
+import ShareButton from "@/components/share-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -159,13 +160,15 @@ export default async function Page({ params }: Props) {
       </div>
 
       {/* 戻るボタン */}
-      <div className="mt-6">
+      <div className="mt-6 flex space-x-4">
         <Link
           href="/"
           className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded"
         >
           戻る
         </Link>
+
+        <ShareButton />
       </div>
     </div>
   );
