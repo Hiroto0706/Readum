@@ -52,7 +52,7 @@ class GCSClient:
         logger.info(f"Saved quiz submission to gs://{self.bucket_name}/{blob_name}")
         return blob_name
 
-    def get_result(self, quiz_id: str):
+    def get_result(self, quiz_id: str) -> Any:
         """
         uuidをもとにCloud Storageからユーザーの回答を取得する
 

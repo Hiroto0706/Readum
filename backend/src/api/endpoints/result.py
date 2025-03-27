@@ -1,7 +1,7 @@
 import logging
-from uuid import UUID
 from fastapi import APIRouter
 
+from src.api.models.quiz import UserAnswer
 from src.api.exceptions.quiz_exceptions import handle_application_exception
 from src.application.usecase.get_result import ResultGetter
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/{uuid}")
+@router.get("/{uuid}", response_model=UserAnswer)
 async def get_result(uuid: str):
     """
     UUIDをもとにユーザーの回答を取得する

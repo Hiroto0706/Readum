@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 
+from src.domain.entities.results import UserAnswer
 from src.application.exceptions.get_result_exceptions import ResultNotFoundError
 from src.infrastructure.storage.gcs_client import GCSClient
 
@@ -21,8 +22,8 @@ class ResultGetter(BaseModel):
         bucket_name = "quiz_answer"
         self.storage_client = GCSClient(bucket_name)
 
-    def get_result_object_from_storage(self):
-        res = self.storage_client.get_result(self.quiz_id)
+    def get_result_object_from_storage(self) -> UserAnswer:
+        res: UserAnswer = self.storage_client.get_result(self.quiz_id)
 
         if not res:
             error_msg = f"Result with UUID {self.quiz_id} not found"
