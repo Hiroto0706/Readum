@@ -1,9 +1,16 @@
+import logging
 from typing import Optional
 from pydantic import BaseModel
 
 from src.domain.entities.results import UserAnswer
-from src.application.exceptions.get_result_exceptions import ResultNotFoundError
+from src.application.exceptions.get_result_exceptions import (
+    GetResultObjectError,
+    ResultNotFoundError,
+)
 from src.infrastructure.storage.gcs_client import GCSClient
+
+
+logger = logging.getLogger(__name__)
 
 
 class ResultGetter(BaseModel):
@@ -23,10 +30,15 @@ class ResultGetter(BaseModel):
         self.storage_client = GCSClient(bucket_name)
 
     def get_result_object_from_storage(self) -> UserAnswer:
-        res: UserAnswer = self.storage_client.get_result(self.quiz_id)
+        try:
+            res: UserAnswer = self.storage_client.get_result(self.quiz_id)
 
-        if not res:
-            error_msg = f"Result with UUID {self.quiz_id} not found"
-            raise ResultNotFoundError(error_msg)
+            if not res:
+                error_msg = f"Result with UUID {self.quiz_id} not found"
+                raise ResultNotFoundError(error_msg)
 
-        return res
+            return res
+        except Exception as e:
+            error_msg = f"Failed to get object from storage: {str(e)}"
+            logger.error(error_msg)
+            raise GetResultObjectError(error_msg)

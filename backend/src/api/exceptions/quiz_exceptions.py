@@ -38,6 +38,7 @@ def handle_application_exception(exception):
     )
     from src.application.exceptions.get_result_exceptions import (
         ResultNotFoundError,
+        GetResultObjectError,
     )
 
     # 例外タイプとHTTP例外のマッピングを定義
@@ -49,6 +50,7 @@ def handle_application_exception(exception):
         VectorStoreOperationError: lambda e: InternalServerError(str(e)),
         RAGProcessingError: lambda e: InternalServerError(str(e)),
         SaveObjectToStorageError: lambda e: InternalServerError(str(e)),
+        GetResultObjectError: lambda e: InternalServerError(str(e)),
     }
 
     # 例外タイプに基づいて適切なHTTP例外を返す

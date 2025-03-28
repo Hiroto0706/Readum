@@ -16,3 +16,10 @@ class ResultNotFoundError(ResultGetBaseException):
     """クイズ結果が取得できなかった場合のエラー"""
 
     pass
+
+
+@dataclass
+class GetResultObjectError(ResultGetBaseException):
+    """オブジェクト取得処理中に発生したエラー"""
+
+    pass

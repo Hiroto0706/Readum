@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class GCSClient:
-    def __init__(self, bucket_name="quiz_answers"):
+    def __init__(self, bucket_name="quiz_answer"):
         """
         Google Cloud Storageクライアントを初期化します。
 
@@ -40,17 +40,22 @@ class GCSClient:
         Returns:
             str: 保存したファイルのパス
         """
-        blob_name = f"{quiz_id}.json"
-        blob = self.bucket.blob(blob_name)
+        try:
+            blob_name = f"{quiz_id}.json"
+            blob = self.bucket.blob(blob_name)
 
-        # データをJSON形式で保存
-        blob.upload_from_string(
-            json.dumps(submission_data, ensure_ascii=False, indent=2),
-            content_type="application/json",
-        )
+            # データをJSON形式で保存
+            blob.upload_from_string(
+                json.dumps(submission_data, ensure_ascii=False, indent=2),
+                content_type="application/json",
+            )
 
-        logger.info(f"Saved quiz submission to gs://{self.bucket_name}/{blob_name}")
-        return blob_name
+            logger.info(f"Saved quiz submission to gs://{self.bucket_name}/{blob_name}")
+            return blob_name
+
+        except Exception as e:
+            logger.error(f"Error saving quiz object to GCS: {str(e)}")
+            raise
 
     def get_result(self, quiz_id: str) -> Any:
         """
