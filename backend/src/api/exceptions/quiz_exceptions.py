@@ -33,14 +33,24 @@ def handle_application_exception(exception):
         VectorStoreOperationError,
         RAGProcessingError,
     )
+    from src.application.exceptions.quiz_submit_exceptions import (
+        SaveObjectToStorageError,
+    )
+    from src.application.exceptions.get_result_exceptions import (
+        ResultNotFoundError,
+        GetResultObjectError,
+    )
 
     # 例外タイプとHTTP例外のマッピングを定義
     exception_mapping = {
         ValueError: lambda e: BadRequestError(str(e)),
         InvalidInputError: lambda e: BadRequestError(str(e)),
         DocumentProcessingError: lambda e: BadRequestError(str(e)),
+        ResultNotFoundError: lambda e: NotFoundError(str(e)),
         VectorStoreOperationError: lambda e: InternalServerError(str(e)),
         RAGProcessingError: lambda e: InternalServerError(str(e)),
+        SaveObjectToStorageError: lambda e: InternalServerError(str(e)),
+        GetResultObjectError: lambda e: InternalServerError(str(e)),
     }
 
     # 例外タイプに基づいて適切なHTTP例外を返す

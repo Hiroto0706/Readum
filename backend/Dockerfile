@@ -8,9 +8,12 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    wget=1.21.3-1+b2 \
+    wget \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
+
+COPY Pipfile Pipfile.lock ./
+RUN pip install pipenv && pipenv install --dev --system --deploy
 
 COPY . .
 

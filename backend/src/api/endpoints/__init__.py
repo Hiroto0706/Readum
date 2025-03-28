@@ -1,4 +1,4 @@
 from .quiz import router as quiz_router
-from .results import router as results_router
+from .result import router as result_router
 
-__all__ = ["quiz_router", "results_router"]
+__all__ = ["quiz_router", "result_router"]

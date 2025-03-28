@@ -73,7 +73,7 @@ export default function Page() {
     try {
       // Server Actionの呼び出し
       const response = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + "/quiz/create_quiz",
+        process.env.NEXT_PUBLIC_API_URL + "/quiz/create_quiz",
         {
           method: "POST",
           headers: {
@@ -111,7 +111,7 @@ export default function Page() {
   };
 
   // 採点処理
-  const handleGradeQuiz = () => {
+  const handleGradeQuiz = async () => {
     if (!quizResponse) return;
 
     let correctCount = 0;
@@ -129,6 +129,36 @@ export default function Page() {
     });
 
     setIsSubmitted(true);
+
+    // バックエンドにユーザーの回答を送信
+    try {
+      // UserAnswer形式のデータを作成
+      const selectedOptions = Object.keys(userAnswers)
+        .sort((a, b) => parseInt(a) - parseInt(b))
+        .map((key) => userAnswers[parseInt(key)]);
+
+      const submissionData = {
+        id: quizResponse.id,
+        preview: quizResponse.preview,
+        selected_options: selectedOptions,
+      };
+
+      // APIを呼び出し
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/quiz/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      console.log("回答が正常に送信されました");
+    } catch (error) {
+      console.error("回答の送信中にエラーが発生しました:", error);
+      // ユーザー体験を損なわないため、エラーが発生しても採点結果は表示する
+      // 必要に応じてここでエラー通知を表示することも可能
+      alert("回答の送信中にエラーが発生しました");
+    }
   };
 
   return (

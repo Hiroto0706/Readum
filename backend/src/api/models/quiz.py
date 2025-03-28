@@ -1,7 +1,8 @@
+import inspect
 from typing import List
 from enum import Enum
 from urllib.parse import urlparse
-from pydantic import ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.dataclasses import dataclass
 
 
@@ -66,3 +67,33 @@ class Quiz:
 class QuizResponse:
     id: str = Field(..., description="Quizを識別するための一意のID")
     preview: Quiz = Field(..., description="クイズのプレビュー")
+
+
+class UserAnswer(BaseModel):
+    id: str = Field(..., description="Quizを識別するための一意のID")
+    preview: Quiz = Field(..., description="クイズのプレビュー")
+    selected_options: List[str] = Field(
+        ..., description="ユーザーの選択した回答のリスト（A, B, C, D...）"
+    )
+
+    @field_validator("selected_options")
+    def validate_selected_options(cls, v, info):
+        """
+        回答の数がクイズの数と一致する
+        各回答がA,B,C,Dのいずれかであることを保証する
+        """
+        preview: Quiz = info.data.get("preview")
+        if preview and len(v) != len(preview.questions):
+            raise ValueError(
+                f"選択された回答の数({len(v)})がクイズの問題数({len(preview.questions)})と一致しません"
+            )
+
+        valid_options = set(inspect.signature(Options).parameters.keys())
+        invalid_options = [opt for opt in v if opt not in valid_options]
+
+        if invalid_options:
+            raise ValueError(
+                f"無効な回答が含まれています: {invalid_options}. 有効な回答は {', '.join(valid_options)} のみです"
+            )
+
+        return v

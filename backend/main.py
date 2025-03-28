@@ -2,7 +2,7 @@ import logging
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.endpoints import quiz_router, results_router
+from src.api.endpoints import quiz_router, result_router
 from config.settings import Settings, settings
 
 load_dotenv()
@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(quiz_router, prefix="/api/v1/quiz")
-app.include_router(results_router, prefix="/api/v1/results")
+app.include_router(result_router, prefix="/api/v1/result")
 
 
 @app.get("/")
