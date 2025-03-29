@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class GCSClient:
-    def __init__(self, bucket_name="quiz_answer"):
+    def __init__(self):
         """
         Google Cloud Storageクライアントを初期化します。
 
@@ -19,15 +19,16 @@ class GCSClient:
         """
         self.storage_client = storage.Client()
 
+        self.bucket_name = "readum"
         env = Settings.app.ENV
-        self.bucket_name = f"readum/{env}/results"
+        self.prefix = f"{env}/results/"
 
         # バケットが存在するか確認し、なければ作成
         try:
-            self.bucket = self.storage_client.get_bucket(bucket_name)
+            self.bucket = self.storage_client.get_bucket(self.bucket_name)
         except Exception:
-            logger.info(f"Bucket {bucket_name} does not exist. Creating...")
-            self.bucket = self.storage_client.create_bucket(bucket_name)
+            logger.info(f"Bucket {self.bucket_name} does not exist. Creating...")
+            self.bucket = self.storage_client.create_bucket(self.bucket_name)
 
     def save_quiz_submission(self, quiz_id: str, submission_data: Any):
         """
@@ -41,7 +42,7 @@ class GCSClient:
             str: 保存したファイルのパス
         """
         try:
-            blob_name = f"{quiz_id}.json"
+            blob_name = f"{self.prefix}{quiz_id}.json"
             blob = self.bucket.blob(blob_name)
 
             # データをJSON形式で保存
@@ -68,19 +69,17 @@ class GCSClient:
           TODO: あとで書く
         """
         try:
-            blobs = list(self.bucket.list_blobs(prefix=quiz_id))
+            blob_name = f"{self.prefix}{quiz_id}.json"
+            blob = self.bucket.blob(blob_name)
 
-            if not blobs:
+            if not blob:
                 logger.warning(f"No submission found for quiz_id: {quiz_id}")
                 return None
 
-            latest_blob = sorted(blobs, key=lambda x: x.name, reverse=True)[0]
-
-            content = latest_blob.download_as_text()
-
+            content = blob.download_as_text()
             submission_data = json.loads(content)
 
-            logger.info(f"Retrieved quiz submission from {latest_blob.name}")
+            logger.info(f"Retrieved quiz submission from {blob_name}")
             return submission_data
 
         except Exception as e:

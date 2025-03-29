@@ -1,11 +1,13 @@
 import logging
+from typing import List, Tuple
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
 
+from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
-from langchain_community.vectorstores import FAISS
 
+from src.domain.repositories.vectordb_repository import VectorStoreHandler
+from src.application.interface.database_file_handler import DBFileHandler
 from src.api.models.quiz import Difficulty, QuizResponse, QuizType
 from src.application.exceptions.quiz_creation_exceptions import (
     DocumentProcessingError,
@@ -86,7 +88,7 @@ class QuizCreator(BaseModel):
         try:
             # ドキュメント処理
             try:
-                document, splitted_doc = self._process_document(quiz_type, content)
+                splitted_doc = self._process_document(quiz_type, content)
             except Exception as e:
                 error_msg = f"Failed to process document: {str(e)}"
                 logger.error(error_msg, exc_info=True)
@@ -138,7 +140,7 @@ class QuizCreator(BaseModel):
             # リソース解放
             self._cleanup_resources(directory_path, db_file_handler)
 
-    def _process_document(self, quiz_type, content):
+    def _process_document(self, quiz_type: QuizType, content: str) -> List[Document]:
         """ドキュメント処理を行うヘルパーメソッド"""
         document_creator = DocumentCreatorImpl()
 
@@ -154,9 +156,11 @@ class QuizCreator(BaseModel):
             document = document_creator.load_document()
 
         splitted_doc = document_creator.split_document(document)
-        return document, splitted_doc
+        return splitted_doc
 
-    def _setup_vector_store(self, splitted_doc, db_file_handler):
+    def _setup_vector_store(
+        self, splitted_doc: List[Document], db_file_handler: DBFileHandler
+    ) -> Tuple[VectorStoreHandler, str]:
         """ベクトルストアのセットアップを行うヘルパーメソッド"""
         embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
         vector_store_handler = VectorStoreHandlerImpl(
@@ -171,12 +175,12 @@ class QuizCreator(BaseModel):
 
     def _process_rag(
         self,
-        vector_store_handler,
-        directory_path,
-        question_count,
-        difficulty,
-        db_file_handler,
-    ):
+        vector_store_handler: VectorStoreHandler,
+        directory_path: str,
+        question_count: int,
+        difficulty: QuizType,
+        db_file_handler: DBFileHandler,
+    ) -> QuizResponse:
         """RAG処理を行うヘルパーメソッド"""
         prompt = get_prompt_from_hub()
         llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
@@ -192,7 +196,9 @@ class QuizCreator(BaseModel):
 
         return QuizResponse(id=db_file_handler.get_unique_id(), preview=rag_response)
 
-    def _cleanup_resources(self, directory_path, db_file_handler):
+    def _cleanup_resources(
+        self, directory_path: str, db_file_handler: DBFileHandler
+    ) -> None:
         """リソース解放を行うヘルパーメソッド"""
         if directory_path:
             try:

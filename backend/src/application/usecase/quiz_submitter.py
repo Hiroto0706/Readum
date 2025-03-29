@@ -28,8 +28,7 @@ class QuizSubmitter(BaseModel):
         """
         super().__init__(user_answer=user_answer)
 
-        bucket_name = "quiz_answer"
-        self.storage_client = GCSClient(bucket_name)
+        self.storage_client = GCSClient()
 
     def save_object_to_storage(self):
         """

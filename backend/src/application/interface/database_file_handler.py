@@ -1,15 +1,19 @@
 import uuid
 from abc import ABC, abstractmethod
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
+
+
+def generate_uuid() -> str:
+    return uuid.uuid4().hex
 
 
 @dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class DBFileHandler(ABC):
     """DBのインデックスのファイル操作を行うモデルの規定クラス"""
 
-    unique_id: str = uuid.uuid4().hex
+    unique_id: str = Field(default_factory=generate_uuid)
 
     @abstractmethod
     def get_unique_id(self) -> str:
