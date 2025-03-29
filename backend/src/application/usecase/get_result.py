@@ -26,8 +26,7 @@ class ResultGetter(BaseModel):
     def __init__(self, quiz_id: str):
         super().__init__(quiz_id=quiz_id)
 
-        bucket_name = "quiz_answer"
-        self.storage_client = GCSClient(bucket_name)
+        self.storage_client = GCSClient()
 
     def get_result_object_from_storage(self) -> UserAnswer:
         try:
