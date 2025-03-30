@@ -1,9 +1,6 @@
 import logging
 import os
 import shutil
-import uuid
-from pydantic import ConfigDict
-from pydantic.dataclasses import dataclass
 
 from src.infrastructure.exceptions.file_system_exceptions import (
     DirectoryCreationError,
@@ -13,32 +10,26 @@ from src.application.interface.database_file_handler import (
     DBFileHandler,
 )
 
-from config.settings import Settings
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class DBFileHandlerImpl(DBFileHandler):
     """DBのインデックスのファイル操作を行うモデルの規定クラス"""
 
-    unique_id: str = uuid.uuid4().hex
-
-    def get_unique_id(self) -> str:
-        return super().get_unique_id()
-
-    def _create_unique_dir_path(self):
+    def _create_unique_dir_path(self, unique_id: str):
         """ファイル保存先のディレクトリのパスを生成する"""
         return os.path.join(
-            Settings.embeddings.TMP_VECTORDB_PATH,
-            Settings.embeddings.VECTORDB_PROVIDER,
-            self.unique_id,
+            settings.embeddings.TMP_VECTORDB_PATH,
+            settings.embeddings.VECTORDB_PROVIDER,
+            unique_id,
         )
 
-    def create_unique_directory(self) -> str:
+    def create_unique_directory(self, unique_id: str) -> str:
         """target_pathにDBファイル保存用のディレクトリを構築する"""
         try:
-            dir_path = self._create_unique_dir_path()
+            dir_path = self._create_unique_dir_path(unique_id)
             os.makedirs(dir_path, exist_ok=True)
 
             logger.info(f"Created directory in a {dir_path}.")
@@ -57,10 +48,10 @@ class DBFileHandlerImpl(DBFileHandler):
             logger.error(error_msg, exc_info=True)
             raise DirectoryCreationError(error_msg)
 
-    def delete_unique_directory(self):
+    def delete_unique_directory(self, unique_id: str):
         """target_pathのディレクトリを削除する関数"""
         try:
-            dir_path = self._create_unique_dir_path()
+            dir_path = self._create_unique_dir_path(unique_id)
             shutil.rmtree(dir_path)
 
         except FileNotFoundError as e:

@@ -1,8 +1,6 @@
 import logging
 import os
-from typing import List
-from pydantic import ConfigDict
-from pydantic.dataclasses import dataclass
+from typing import List, Optional
 
 from langchain_community.vectorstores import FAISS
 from langchain_core.vectorstores import VectorStoreRetriever
@@ -18,7 +16,7 @@ from src.infrastructure.exceptions.vectordb_exceptions import (
 )
 from src.domain.repositories.vectordb_repository import VectorStoreHandler
 
-from config.settings import Settings
+from config.settings import settings
 
 
 logger = logging.getLogger(__name__)
@@ -29,14 +27,13 @@ def get_faiss_index(doc: List[Document], embeddings: OpenAIEmbeddings) -> FAISS:
     return FAISS.from_documents(doc, embeddings)
 
 
-@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class VectorStoreHandlerImpl(VectorStoreHandler):
     """
     FAISSインデックスを操作するために必要なメソッドの実態をここで定義する
     """
 
     embeddings_model: OpenAIEmbeddings
-    vectorstore: None | FAISS
+    vectorstore: Optional[FAISS] = None
 
     def set_vectorstore(self, document: List[Document]) -> "VectorStoreHandlerImpl":
         if not document:
@@ -110,7 +107,7 @@ class VectorStoreHandlerImpl(VectorStoreHandler):
                 dir_path, self.embeddings_model, allow_dangerous_deserialization=True
             )
             retriever = vectorstore.as_retriever(
-                search_kwargs={"k": Settings.embeddings.SEARCH_KWARGS}
+                search_kwargs={"k": settings.embeddings.SEARCH_KWARGS}
             )
             logger.info(
                 f"Successfully loaded vectorstore from {dir_path} and created retriever"

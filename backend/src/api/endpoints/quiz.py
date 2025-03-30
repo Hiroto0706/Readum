@@ -61,7 +61,6 @@ async def submit_answer(user_answer: UserAnswer):
         difficulty (Difficulty): クイズの難易度
         question_count (int): クイズの数
     """
-    # TODO: submit処理の実装
     try:
         quiz_submitter: QuizSubmitter = QuizSubmitter(user_answer)
         quiz_submitter.save_object_to_storage()

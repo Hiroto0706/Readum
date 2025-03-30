@@ -23,11 +23,14 @@ async def get_result(uuid: str):
         UserAnswer: ユーザーの回答結果
     """
     try:
-        # TODO: 環境変数で管理しよう
         result_getter = ResultGetter(uuid)
         res = result_getter.get_result_object_from_storage()
 
         return res
+
+    except ValueError as e:
+        logger.error(f"Invalid input value: {str(e)}", exc_info=True)
+        raise handle_application_exception(e)
 
     except Exception as e:
         logger.error(f"Error creating quiz: {str(e)}", exc_info=True)

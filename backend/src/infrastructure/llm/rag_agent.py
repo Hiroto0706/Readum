@@ -1,8 +1,5 @@
 import logging
 from operator import itemgetter
-from typing import Any
-from pydantic import ConfigDict
-from pydantic.dataclasses import dataclass
 
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI
@@ -19,13 +16,8 @@ from src.infrastructure.exceptions.llm_exceptions import (
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class RAGAgentModelImpl(RAGAgentModel):
     """RAG Agentを実装し、クイズを生成するモデル"""
-
-    llm: ChatOpenAI
-    prompt: Any
-    rag_chain: Any
 
     def set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":
         """RAGを実行するためのChainを生成する"""
@@ -40,7 +32,9 @@ class RAGAgentModelImpl(RAGAgentModel):
                 | self.prompt
                 | self.llm.with_structured_output(Quiz)
             )
-            return RAGAgentModelImpl(self.llm, self.prompt, rag_chain)
+            return RAGAgentModelImpl(
+                llm=self.llm, prompt=self.prompt, rag_chain=rag_chain
+            )
 
         except Exception as e:
             error_msg = f"Failed to set up RAG chain: {str(e)}"

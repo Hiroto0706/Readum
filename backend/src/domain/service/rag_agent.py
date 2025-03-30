@@ -1,20 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import Any, Final
-from pydantic import Field
-from pydantic.dataclasses import dataclass
+from typing import Any
+from pydantic import BaseModel, ConfigDict, Field
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.vectorstores import VectorStoreRetriever
 
 from src.domain.entities.quiz import Quiz
 
 
-@dataclass(frozen=True)
-class RAGAgentModel(ABC):
+class RAGAgentModel(BaseModel, ABC):
     """RAGを実装実装し、クイズを生成するための抽象モデル"""
 
-    llm: Final[BaseChatModel] = Field(..., description="LLMモデル")
-    prompt: Final[Any] = Field(..., description="プロンプトテンプレート")
-    rag_chain: Final[Any] = Field(default=None, description="RAG Chain", init=False)
+    llm: BaseChatModel = Field(..., description="LLMモデル")
+    prompt: Any = Field(..., description="プロンプトテンプレート")
+    rag_chain: Any = Field(default=None, description="RAG Chain", init=False)
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @abstractmethod
     def set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":
