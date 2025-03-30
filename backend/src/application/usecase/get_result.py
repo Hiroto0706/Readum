@@ -1,6 +1,5 @@
 import logging
-from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.domain.entities.results import UserAnswer
 from src.application.exceptions.get_result_exceptions import (
@@ -19,18 +18,18 @@ class ResultGetter(BaseModel):
     """
 
     quiz_id: str
-    storage_client: Optional[GCSClient] = None
+    storage_client: GCSClient
 
-    model_config = {"arbitrary_types_allowed": True}
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, quiz_id: str):
-        super().__init__(quiz_id=quiz_id)
 
-        self.storage_client = GCSClient()
+        storage_client = GCSClient()
+        super().__init__(quiz_id=quiz_id, storage_client=storage_client)
 
     def get_result_object_from_storage(self) -> UserAnswer:
         try:
-            res: UserAnswer = self.storage_client.get_result(self.quiz_id)
+            res = self.storage_client.get_result(self.quiz_id)
 
             if not res:
                 error_msg = f"Result with UUID {self.quiz_id} not found"

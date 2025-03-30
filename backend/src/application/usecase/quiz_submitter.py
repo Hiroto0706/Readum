@@ -1,7 +1,6 @@
 import logging
-from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.application.exceptions.quiz_submit_exceptions import (
     SaveObjectToStorageError,
@@ -15,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 class QuizSubmitter(BaseModel):
     user_answer: UserAnswer
-    storage_client: Optional[GCSClient] = None
+    storage_client: GCSClient
 
-    model_config = {"arbitrary_types_allowed": True}
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, user_answer: UserAnswer):
         """
@@ -26,9 +25,9 @@ class QuizSubmitter(BaseModel):
         Args:
           user_answer: UserAnswer
         """
-        super().__init__(user_answer=user_answer)
 
-        self.storage_client = GCSClient()
+        storage_client = GCSClient()
+        super().__init__(user_answer=user_answer, storage_client=storage_client)
 
     def save_object_to_storage(self):
         """
@@ -38,7 +37,7 @@ class QuizSubmitter(BaseModel):
         quiz_id = self.user_answer.id
         try:
             user_answer_dict = self.user_answer.model_dump()
-            self.storage_client.save_quiz_submission(quiz_id, user_answer_dict)
+            self.storage_client.save_quiz(quiz_id, user_answer_dict)
         except Exception as e:
             error_msg = f"Failed to save object to storage: {str(e)}"
             logger.error(error_msg, exc_info=True)
