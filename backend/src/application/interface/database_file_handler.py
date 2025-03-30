@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class DBFileHandler(ABC, BaseModel, frozen=True):
+class DBFileHandler(ABC, BaseModel):
     """DBのインデックスのファイル操作を行うモデルの規定クラス"""
 
     model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)

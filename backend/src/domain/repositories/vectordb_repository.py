@@ -1,16 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import Final
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore, VectorStoreRetriever
 
 
-class VectorStoreHandler(ABC):
-    embeddings_model: Final[Embeddings] = Field(..., description="埋め込みモデル")
-    vectorstore: Final[VectorStore] = Field(
+class VectorStoreHandler(ABC, BaseModel):
+    embeddings_model: Embeddings = Field(..., description="埋め込みモデル")
+    vectorstore: VectorStore = Field(
         default=None, description="ベクトルストアインスタンス"
     )
+
+    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
 
     @abstractmethod
     def set_vectorstore(self) -> "VectorStoreHandler":

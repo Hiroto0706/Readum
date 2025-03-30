@@ -38,7 +38,7 @@ from src.infrastructure.exceptions.file_system_exceptions import (
     DirectoryDeletionError,
 )
 
-from config.settings import Settings
+from config.settings import settings
 
 
 logger = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ class QuizCreator(BaseModel):
         self, splitted_doc: List[Document], db_file_handler: DBFileHandler, uuid: str
     ) -> Tuple[VectorStoreHandler, str]:
         """ベクトルストアのセットアップを行うヘルパーメソッド"""
-        embeddings = OpenAIEmbeddings(model=Settings.model.TEXT_EMBEDDINGS_MODEL)
+        embeddings = OpenAIEmbeddings(model=settings.model.TEXT_EMBEDDINGS_MODEL)
         vector_store_handler = VectorStoreHandlerImpl(
             embeddings_model=embeddings,
             vectorstore=get_faiss_index(splitted_doc, embeddings),
@@ -188,7 +188,7 @@ class QuizCreator(BaseModel):
     ) -> QuizResponse:
         """RAG処理を行うヘルパーメソッド"""
         prompt = get_prompt_from_hub()
-        llm = ChatOpenAI(model_name=Settings.model.GPT_MODEL)
+        llm = ChatOpenAI(model_name=settings.model.GPT_MODEL)
         rag_agent = RAGAgentModelImpl(llm=llm, prompt=prompt, rag_chain=None)
 
         retriever = vector_store_handler.as_retriever(directory_path)

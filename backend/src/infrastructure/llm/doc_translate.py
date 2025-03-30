@@ -11,7 +11,7 @@ from src.infrastructure.exceptions.llm_exceptions import (
     TranslationError,
 )
 
-from config.settings import Settings
+from config.settings import settings
 
 
 logger = logging.getLogger(__name__)
@@ -22,8 +22,8 @@ class DocumentTranslateImpl(DocumentCreator):
 
     text_splitter: TextSplitter = Field(
         default_factory=lambda: CharacterTextSplitter(
-            chunk_size=Settings.text_splitter.CHUNK_SIZE,
-            chunk_overlap=Settings.text_splitter.CHUNK_OVERLAP,
+            chunk_size=settings.text_splitter.CHUNK_SIZE,
+            chunk_overlap=settings.text_splitter.CHUNK_OVERLAP,
         ),
         description="テキストスプリッターインスタンス",
     )

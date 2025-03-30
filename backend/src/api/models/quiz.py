@@ -2,8 +2,9 @@ import inspect
 from typing import List
 from enum import Enum
 from urllib.parse import urlparse
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from src.domain.entities.quiz import Quiz as DomainQuiz
 
 
 class QuizType(Enum):
@@ -17,8 +18,7 @@ class Difficulty(Enum):
     ADVANCED = "advanced"
 
 
-@dataclass(config=ConfigDict(populate_by_name=True))
-class QuizRequest:
+class QuizRequest(BaseModel):
     type: QuizType = Field(..., description="クイズのタイプ（テキスト or URL）")
     content: str = Field(
         ..., description="ユーザーからの入力内容（読書メモやテストしたいサイトのURL）"
@@ -28,9 +28,20 @@ class QuizRequest:
         ..., alias="questionCount", description="生成するクイズの数", ge=3, le=20
     )
 
-    def __post_init__(self):
+    model_config = ConfigDict(populate_by_name=True, frozen=True)
+
+    @field_validator("content")
+    @classmethod
+    def validate_content_not_empty(cls, v: str) -> str:
+        """content が空でないことをチェックします。"""
+        if not v or len(v.strip()) == 0:
+            raise ValueError("The 'content' field cannot be empty.")
+        return v
+
+    @model_validator(mode="after")
+    def validate_content(self):
         """
-        type が QuizType.URL の場合、content が有効な URL 形式かチェックします。
+        contentが空じゃない & type が QuizType.URL の場合、content が有効な URL 形式かチェック。
         """
         if self.type == QuizType.URL:
             parsed = urlparse(self.content)
@@ -38,35 +49,40 @@ class QuizRequest:
                 raise ValueError(
                     "When the 'type' field is set to 'url', the 'content' field must be in a valid URL format."
                 )
+        return self
 
 
-@dataclass(frozen=True)
-class Options:
+class Options(BaseModel):
     A: str
     B: str
     C: str
     D: str
 
+    model_config = ConfigDict(frozen=True)
 
-@dataclass(frozen=True)
-class Question:
+
+class Question(BaseModel):
     content: str = Field(..., description="質問内容")
     options: Options = Field(..., description="選択肢")
     answer: str = Field(..., description="正解の選択肢")
     explanation: str = Field(..., description="解答の説明")
 
+    model_config = ConfigDict(frozen=True)
 
-@dataclass(frozen=True)
-class Quiz:
+
+class Quiz(BaseModel):
     questions: List[Question] = Field(
         ..., description="クイズのリスト", min_length=3, max_length=20
     )
 
+    model_config = ConfigDict(frozen=True)
 
-@dataclass(frozen=True)
-class QuizResponse:
+
+class QuizResponse(BaseModel):
     id: str = Field(..., description="Quizを識別するための一意のID")
-    preview: Quiz = Field(..., description="クイズのプレビュー")
+    preview: DomainQuiz = Field(..., description="クイズのプレビュー")
+
+    model_config = ConfigDict(frozen=True)
 
 
 class UserAnswer(BaseModel):
@@ -75,6 +91,8 @@ class UserAnswer(BaseModel):
     selected_options: List[str] = Field(
         ..., description="ユーザーの選択した回答のリスト（A, B, C, D...）"
     )
+
+    model_config = ConfigDict(frozen=True)
 
     @field_validator("selected_options")
     def validate_selected_options(cls, v, info):

@@ -10,7 +10,7 @@ from src.application.interface.database_file_handler import (
     DBFileHandler,
 )
 
-from config.settings import Settings
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,8 @@ class DBFileHandlerImpl(DBFileHandler):
     def _create_unique_dir_path(self, unique_id: str):
         """ファイル保存先のディレクトリのパスを生成する"""
         return os.path.join(
-            Settings.embeddings.TMP_VECTORDB_PATH,
-            Settings.embeddings.VECTORDB_PROVIDER,
+            settings.embeddings.TMP_VECTORDB_PATH,
+            settings.embeddings.VECTORDB_PROVIDER,
             unique_id,
         )
 

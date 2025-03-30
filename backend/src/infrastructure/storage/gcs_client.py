@@ -6,7 +6,7 @@ from google.cloud import storage
 from src.domain.repositories.storage_repository import StorageService
 from src.domain.entities.results import UserAnswer
 
-from config.settings import Settings
+from config.settings import settings
 
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class GCSClient(StorageService):
         """
         storage_client = storage.Client()
         bucket_name = "readum"
-        env = Settings.app.ENV
+        env = settings.app.ENV
         prefix = f"{env}/results/"
 
         # バケットが存在するか確認し、なければ作成
