@@ -36,6 +36,9 @@ class ResultGetter(BaseModel):
                 raise ResultNotFoundError(error_msg)
 
             return res
+        except ResultNotFoundError:
+            raise
+
         except Exception as e:
             error_msg = f"Failed to get object from storage: {str(e)}"
             logger.error(error_msg)
