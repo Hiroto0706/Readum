@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
   title: "Readum",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="max-w-[800px] mx-auto">
+        <Header />
+
+        <main>{children}</main>
+      </body>
     </html>
   );
 }
