@@ -1,9 +1,9 @@
-import { InputForm } from "@/features/input-form";
+import { QuizForm } from "@/features/quiz-form";
 
 export default function Page() {
   return (
     <>
-      <InputForm />
+    <QuizForm />
     </>
   );
 }
