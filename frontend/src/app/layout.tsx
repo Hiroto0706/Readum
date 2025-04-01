@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Readum",
@@ -17,7 +18,9 @@ export default function RootLayout({
       <body className="max-w-[800px] mx-auto">
         <Header />
 
-        <main>{children}</main>
+        <main className="text-emerald-900 mb-32">{children}</main>
+
+        <Footer />
       </body>
     </html>
   );

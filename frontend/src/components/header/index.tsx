@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const Header: React.FC = () => {
   return (
-    <header className="bg-emerald-500 h-16 w-full flex items-center justify-between px-8 absolute top-0 left-0">
+    <header className="bg-emerald-500 h-16 w-full flex items-center justify-between px-2 md:px-8 absolute top-0 left-0">
       <div className="flex items-center">
         <Image src="/icons/icon.svg" alt="Readum logo" width={40} height={40} />
         <span className="text-white text-xl font-bold ml-2">Readum</span>
