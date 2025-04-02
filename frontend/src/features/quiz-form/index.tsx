@@ -6,9 +6,11 @@ import { Description } from "@/features/quiz-form/components/description";
 import { QuizResponse } from "@/features/quiz-form/types";
 import { InputForm } from "@/features/quiz-form/components/input-form";
 import { ErrorMessage } from "@/features/quiz-form/components/error-message";
+import Image from "next/image";
 
 export const QuizForm: React.FC = () => {
-  const [error, setError] = useState(""); const [quizResponse, setQuizResponse] = useState<QuizResponse | null>(null);
+  const [error, setError] = useState("");
+  const [quizResponse, setQuizResponse] = useState<QuizResponse | null>(null);
   // 回答と採点結果の状態
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -16,8 +18,6 @@ export const QuizForm: React.FC = () => {
     correct: 0,
     total: 0,
   });
-
-  const router = useRouter();
 
   // 回答を選択したときのハンドラ
   const handleAnswerSelect = (questionIndex: number, answer: string) => {
@@ -80,12 +80,12 @@ export const QuizForm: React.FC = () => {
 
   return (
     <>
-      <Description />
-
-      <ErrorMessage error={error} />
-
       {!quizResponse && (
         <>
+          <Description />
+
+          <ErrorMessage error={error} />
+
           <InputForm
             setUserAnswers={setUserAnswers}
             setIsSubmitted={setIsSubmitted}
@@ -96,8 +96,18 @@ export const QuizForm: React.FC = () => {
       )}
 
       {quizResponse && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">作成されたクイズ</h2>
+        <div className="pt-8">
+          <h2 className="text-xl font-bold flex items-center text-emerald-500 mb-6">
+            <Image
+              src="/icons/star.svg"
+              alt="Star icon"
+              width={20}
+              height={20}
+              className="mr-2"
+            />
+            クイズに回答しよう！
+          </h2>
+
           <p className="mb-4">クイズID: {quizResponse.id}</p>
 
           {isSubmitted && (
@@ -114,17 +124,29 @@ export const QuizForm: React.FC = () => {
             </div>
           )}
 
-          <div className="space-y-6">
+          <div className="space-y-6 mb-16">
             {quizResponse.preview.questions.map((question, qIndex) => (
-              <div key={qIndex} className="border p-4 rounded shadow-sm">
-                <h3 className="font-bold text-lg mb-2">問題 {qIndex + 1}</h3>
-                <p className="mb-4">{question.content}</p>
+              <div
+                key={qIndex}
+                className="rounded-xl shadow-md overflow-hidden"
+              >
+                <div className="font-bold text-lg text-white px-6 py-2 bg-emerald-500 flex items-center">
+                  <span className="rounded-full bg-white text-emerald-500 w-8 h-8 block flex justify-center items-center mr-2">
+                    {qIndex + 1}
+                  </span>
+                  {question.content}
+                </div>
 
-                <div className="space-y-2 mb-4">
-                  <h4 className="font-medium">選択肢:</h4>
+                <div className="space-y-2 p-6">
                   {Object.entries(question.options).map(([key, value]) => (
-                    <div key={key} className="pl-4">
-                      <label className="flex items-center space-x-2">
+                    <div key={key}>
+                      <label
+                        className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer ${
+                          userAnswers[qIndex] === key
+                            ? "bg-emerald-50 border-emerald-500"
+                            : "border-gray-300 hover:bg-gray-100"
+                        } duration-300`}
+                      >
                         <input
                           type="radio"
                           name={`question-${qIndex}`}
@@ -132,18 +154,13 @@ export const QuizForm: React.FC = () => {
                           checked={userAnswers[qIndex] === key}
                           onChange={() => handleAnswerSelect(qIndex, key)}
                           disabled={isSubmitted}
-                          className="form-radio"
+                          className="appearance-none w-6 h-6 border border-emerald-500 rounded-full checked:border-emerald-500 transition-colors"
                         />
-                        <span
-                          className={`font-medium ${
-                            isSubmitted && key === question.answer
-                              ? "text-green-600"
-                              : ""
-                          }`}
-                        >
-                          {key}:
-                        </span>
-                        <span>{value}</span>
+                        {userAnswers[qIndex] === key && (
+                          // ml-1は丸を縦横中央に配置するため
+                          <div className="absolute w-4 h-4 ml-1 bg-emerald-500 rounded-full pointer-events-none"></div>
+                        )}
+                        <span className="ml-2">{value}</span>
                       </label>
                     </div>
                   ))}
@@ -172,7 +189,37 @@ export const QuizForm: React.FC = () => {
             ))}
           </div>
 
-          <div className="mt-6 flex space-x-4">
+          <div className="mb-16">
+            <div className="w-full bg-gray-100 rounded-full h-6 overflow-hidden mb-6">
+              <div
+                className="bg-emerald-500 h-6 rounded-l-full transition-all duration-500 ease-out"
+                style={{
+                  width: `${
+                    (Object.keys(userAnswers).length /
+                      quizResponse.preview.questions.length) *
+                    100
+                  }%`,
+                }}
+              ></div>
+            </div>
+
+            <div className="flex justify-between mb-2 font-bold">
+              <span className="text-sm">
+                {Object.keys(userAnswers).length} of{" "}
+                {quizResponse.preview.questions.length} questions answered
+              </span>
+              <span className="text-sm font-medium text-emerald-600 font-bold">
+                {Math.round(
+                  (Object.keys(userAnswers).length /
+                    quizResponse.preview.questions.length) *
+                    100
+                )}
+                %
+              </span>
+            </div>
+          </div>
+
+          <div>
             {!isSubmitted ? (
               <button
                 onClick={handleGradeQuiz}
@@ -180,9 +227,21 @@ export const QuizForm: React.FC = () => {
                   Object.keys(userAnswers).length !==
                   quizResponse.preview.questions.length
                 }
-                className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded disabled:opacity-50"
+                className={`w-full bg-emerald-500 flex justify-center items-center text-white font-bold py-3 px-4 rounded-full disabled:opacity-50 duration-300 ${
+                  Object.keys(userAnswers).length !==
+                  quizResponse.preview.questions.length
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer hover:bg-emerald-600"
+                }`}
               >
-                回答を送信して採点する
+                <Image
+                  src="/icons/check.svg"
+                  alt="Check mark icon"
+                  width={24}
+                  height={24}
+                  className="mr-2"
+                />
+                回答を送信する
               </button>
             ) : (
               <button
@@ -190,18 +249,16 @@ export const QuizForm: React.FC = () => {
                   setUserAnswers({});
                   setIsSubmitted(false);
                 }}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
+                className={`w-full bg-blue-500 flex justify-center items-center text-white font-bold py-3 px-4 rounded-full disabled:opacity-50 duration-300 ${
+                  Object.keys(userAnswers).length !==
+                  quizResponse.preview.questions.length
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer hover:bg-blue-600"
+                }`}
               >
                 もう一度解く
               </button>
             )}
-
-            <button
-              onClick={() => router.push(`/quiz/${quizResponse.id}`)}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded"
-            >
-              クイズを共有する
-            </button>
           </div>
         </div>
       )}
