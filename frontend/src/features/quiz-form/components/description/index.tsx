@@ -3,8 +3,7 @@ import React from "react";
 export const Description: React.FC = () => {
   return (
     <>
-      {/* mt-16はHeader分の高さ */}
-      <section className="mt-16 py-2 md:py-8">
+      <section className="py-2 md:py-8">
         <div className="text-left my-4 md:my-8 max-w-[800px] mx-auto px-2">
           <div className="mb-2 md:flex md:items-baseline">
             <h2 className="text-7xl font-bold text-emerald-500 inline-block">

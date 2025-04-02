@@ -8,9 +8,7 @@ import { InputForm } from "@/features/quiz-form/components/input-form";
 import { ErrorMessage } from "@/features/quiz-form/components/error-message";
 
 export const QuizForm: React.FC = () => {
-  const [error, setError] = useState("");
-  const [quizResponse, setQuizResponse] = useState<QuizResponse | null>(null);
-
+  const [error, setError] = useState(""); const [quizResponse, setQuizResponse] = useState<QuizResponse | null>(null);
   // 回答と採点結果の状態
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
