@@ -96,7 +96,7 @@ export const QuizForm: React.FC = () => {
       )}
 
       {quizResponse && (
-        <div className="pt-8">
+        <div className="pt-8 mx-2">
           <h2 className="text-xl font-bold flex items-center text-emerald-500 mb-6">
             <Image
               src="/icons/star.svg"
@@ -130,36 +130,40 @@ export const QuizForm: React.FC = () => {
                 key={qIndex}
                 className="rounded-xl shadow-md overflow-hidden"
               >
-                <div className="font-bold text-lg text-white px-6 py-2 bg-emerald-500 flex items-center">
-                  <span className="rounded-full bg-white text-emerald-500 w-8 h-8 block flex justify-center items-center mr-2">
-                    {qIndex + 1}
-                  </span>
-                  {question.content}
+                <div className="font-bold text-lg text-white px-2 md:px-6 py-4 bg-emerald-500 flex items-center">
+                  <div className="relative flex items-center min-w-8 min-h-8">
+                    <span className="absolute rounded-full bg-white text-emerald-500 min-w-8 min-h-8 block flex justify-center items-center md:mr-2">
+                      {qIndex + 1}
+                    </span>
+                  </div>
+                  <p className="pl-2">{question.content}</p>
                 </div>
 
-                <div className="space-y-2 p-6">
+                <div className="space-y-2 py-4 px-2 md:p-6">
                   {Object.entries(question.options).map(([key, value]) => (
                     <div key={key}>
                       <label
-                        className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer ${
+                        className={`flex items-center border rounded-lg p-3 cursor-pointer ${
                           userAnswers[qIndex] === key
                             ? "bg-emerald-50 border-emerald-500"
                             : "border-gray-300 hover:bg-gray-100"
                         } duration-300`}
                       >
-                        <input
-                          type="radio"
-                          name={`question-${qIndex}`}
-                          value={key}
-                          checked={userAnswers[qIndex] === key}
-                          onChange={() => handleAnswerSelect(qIndex, key)}
-                          disabled={isSubmitted}
-                          className="appearance-none w-6 h-6 border border-emerald-500 rounded-full checked:border-emerald-500 transition-colors"
-                        />
-                        {userAnswers[qIndex] === key && (
-                          // ml-1は丸を縦横中央に配置するため
-                          <div className="absolute w-4 h-4 ml-1 bg-emerald-500 rounded-full pointer-events-none"></div>
-                        )}
+                        <div className="relative flex items-center justify-center">
+                          <input
+                            type="radio"
+                            name={`question-${qIndex}`}
+                            value={key}
+                            checked={userAnswers[qIndex] === key}
+                            onChange={() => handleAnswerSelect(qIndex, key)}
+                            disabled={isSubmitted}
+                            className="appearance-none w-5 md:w-6 h-5 md:h-6 border border-emerald-500 rounded-full checked:border-emerald-500 transition-colors"
+                          />
+                          {userAnswers[qIndex] === key && (
+                            // ml-1は丸を縦横中央に配置するため
+                            <div className="absolute w-3 md:w-4 h-3 md:h-4 bg-emerald-500 rounded-full pointer-events-none"></div>
+                          )}
+                        </div>
                         <span className="ml-2">{value}</span>
                       </label>
                     </div>
