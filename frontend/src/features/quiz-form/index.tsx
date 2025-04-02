@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Description } from "@/features/quiz-form/components/description";
-import { QuizResponse } from "./types";
-import { InputForm } from "./components/input-form";
+import { QuizResponse } from "@/features/quiz-form/types";
+import { InputForm } from "@/features/quiz-form/components/input-form";
+import { ErrorMessage } from "@/features/quiz-form/components/error-message";
 
 export const QuizForm: React.FC = () => {
   const [error, setError] = useState("");
@@ -83,11 +84,7 @@ export const QuizForm: React.FC = () => {
     <>
       <Description />
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+      <ErrorMessage error={error} />
 
       {!quizResponse && (
         <>

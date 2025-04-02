@@ -1,8 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { QuizResponse } from "../../types";
+import { QuizResponse } from "@/features/quiz-form/types";
 import Image from "next/image";
+import { TextArea } from "@/features/quiz-form/components/input-form/components/textarea";
+import { DifficultyLevel } from "@/features/quiz-form/components/input-form/components/difficulty-level";
+import { QuestionCount } from "@/features/quiz-form/components/input-form/components/question-count";
+import { SubmitButton } from "@/features/quiz-form/components/input-form/components/submit-button";
+import {
+  Difficulty,
+  QuizType,
+} from "@/features/quiz-form/components/input-form/types";
 
 interface Props {
   setUserAnswers: React.Dispatch<React.SetStateAction<Record<number, string>>>;
@@ -17,10 +25,12 @@ export const InputForm: React.FC<Props> = ({
   setError,
   setQuizResponse,
 }) => {
-  const [quizType, setQuizType] = useState("text");
+  const [quizType, setQuizType] = useState<QuizType>(QuizType.TEXT);
   const [content, setContent] = useState("");
-  const [difficulty, setDifficulty] = useState("intermediate");
-  const [questionCount, setQuestionCount] = useState(5);
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    Difficulty.INTERMEDIATE
+  );
+  const [questionCount, setQuestionCount] = useState<number | null>(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,14 +41,16 @@ export const InputForm: React.FC<Props> = ({
     setUserAnswers({});
     setIsSubmitted(false);
 
-    // 問題数のバリデーションを追加
+    if (!questionCount) {
+      return;
+    }
     if (questionCount < 3 || questionCount > 20) {
       setError("問題数は3〜20問の間で設定してください");
       setIsSubmitting(false);
       return;
     }
 
-    if (quizType === "url") {
+    if (quizType === QuizType.URL) {
       try {
         const url = new URL(content);
         if (!url.protocol.startsWith("http")) {
@@ -54,7 +66,6 @@ export const InputForm: React.FC<Props> = ({
     }
 
     try {
-      // Server Actionの呼び出し
       const response = await fetch(
         process.env.NEXT_PUBLIC_API_URL + "/quiz/create_quiz",
         {
@@ -99,129 +110,27 @@ export const InputForm: React.FC<Props> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 p-4 md:p-8">
-        <div className="flex rounded-md space-x-1 overflow-hidden p-1 bg-emerald-50 font-bold">
-          <button
-            type="button"
-            onClick={() => setQuizType("text")}
-            disabled={isSubmitting}
-            className={`flex-1 py-2 px-4 flex justify-center items-center rounded-md duration-300 ${
-              quizType === "text" ? "bg-emerald-500 text-white" : ""
-            } ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
-          >
-            <Image
-              src={`/icons/text${quizType === "text" ? "-active" : ""}.svg`}
-              alt="Generate icon"
-              width={20}
-              height={20}
-              className="mr-1"
-            />
-            <p>テキスト</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setQuizType("url")}
-            disabled={isSubmitting}
-            className={`flex-1 py-2 px-4 flex justify-center items-center rounded-md duration-300 ${
-              quizType === "url" ? "bg-emerald-500 text-white" : ""
-            } ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
-          >
-            <Image
-              src={`/icons/web${quizType === "url" ? "-active" : ""}.svg`}
-              alt="Generate icon"
-              width={20}
-              height={20}
-              className="mr-1"
-            />
-            <p>URL</p>
-          </button>
-        </div>
+        <TextArea
+          setQuizType={setQuizType}
+          isSubmitting={isSubmitting}
+          quizType={quizType}
+          content={content}
+          setContent={setContent}
+        />
 
-        <div>
-          {quizType === "text" ? (
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full p-2 border border-emerald-300 rounded"
-              rows={5}
-              disabled={isSubmitting}
-              placeholder="読書メモをここに入力してください"
-              required
-            />
-          ) : (
-            <input
-              type="url"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full p-2 border border-emerald-300 rounded"
-              disabled={isSubmitting}
-              placeholder="https://example.com"
-              pattern="https?://.*"
-              required
-            />
-          )}
-        </div>
+        <DifficultyLevel
+          difficulty={difficulty}
+          setDifficulty={setDifficulty}
+          isSubmitting={isSubmitting}
+        />
 
-        <div>
-          <label className="flex justify-start mb-2 font-medium">
-            <span className="mr-1">⚡️</span>
-            <p className="font-bold">難易度</p>
-          </label>
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-            className="w-full p-2 border border-emerald-300 rounded"
-            required
-            disabled={isSubmitting}
-          >
-            <option value="beginner">
-              初級 <span>📚</span>
-            </option>
-            <option value="intermediate">
-              中級 <span>🧠</span>
-            </option>
-            <option value="advanced">
-              上級 <span>🚀</span>
-            </option>
-          </select>
-        </div>
+        <QuestionCount
+          questionCount={questionCount}
+          setQuestionCount={setQuestionCount}
+          isSubmitting={isSubmitting}
+        />
 
-        <div>
-          <label className="flex justify-start mb-2 font-medium">
-            <span className="mr-1">💡</span>
-            <p className="font-bold">問題数</p>
-          </label>
-          <input
-            type="number"
-            min="3"
-            max="20"
-            value={questionCount}
-            onChange={(e) => setQuestionCount(parseInt(e.target.value))}
-            className="w-full p-2 border border-emerald-300 rounded"
-            required
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            3〜20問の間で設定してください
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`w-full flex justify-center bg-emerald-500 text-white font-medium py-2 px-4 rounded disabled:opacity-50 duration-300 ${
-            isSubmitting
-              ? "cursor-not-allowed"
-              : "hover:bg-emerald-600 cursor-pointer"
-          }`}
-        >
-          <Image
-            src="/icons/generate.svg"
-            alt="Generate icon"
-            width={20}
-            height={20}
-            className="mr-2"
-          />
-          <p>{isSubmitting ? "作成中..." : "クイズを作成する！"}</p>
-        </button>
+        <SubmitButton isSubmitting={isSubmitting} />
       </form>
     </div>
   );
