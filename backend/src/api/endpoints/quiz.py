@@ -64,7 +64,7 @@ async def submit_answer(user_answer: UserAnswer):
     try:
         quiz_submitter: QuizSubmitter = QuizSubmitter(user_answer)
         quiz_submitter.save_object_to_storage()
-        return
+        return {"uuid": user_answer.id}
 
     except ValueError as e:
         logger.error(f"Invalid input value: {str(e)}", exc_info=True)
