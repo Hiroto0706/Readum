@@ -20,7 +20,7 @@ export default function ShareButton() {
     <div className="flex justify-center items-center">
       <button
         onClick={handleShare}
-        className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-6 rounded-full mb-8 flex justify-center items-center cursor-pointer duration-300"
+        className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-6 rounded-full mb-8 flex justify-center items-center cursor-pointer duration-300 shadow-md"
       >
         <Image
           src="/icons/share.svg"

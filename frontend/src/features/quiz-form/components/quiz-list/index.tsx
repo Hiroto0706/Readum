@@ -1,9 +1,9 @@
 import Image from "next/image";
 import React from "react";
-import { QuizResponse } from "../../types";
-import { QuestionCard } from "./components/question-card";
-import { ProgressBar } from "./components/progress-bar";
-import { SubmitButton } from "./components/submit-button";
+import { QuizResponse } from "@/features/quiz-form/types";
+import { ProgressBar } from "@/features/quiz-form/components/quiz-list/components/progress-bar";
+import { SubmitButton } from "@/features/quiz-form/components/quiz-list/components/submit-button";
+import { QuestionCard } from "@/features/quiz-form/components/quiz-list/components/question-card";
 
 interface Props {
   quizResponse: QuizResponse;

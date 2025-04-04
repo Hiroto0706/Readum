@@ -27,9 +27,9 @@ export const DifficultyLevel: React.FC<Props> = ({
         required
         disabled={isSubmitting}
       >
-        <option value={Difficulty.BEGINNER}>初級 📚</option>
-        <option value={Difficulty.INTERMEDIATE}>中級 🧠</option>
-        <option value={Difficulty.ADVANCED}>上級 🚀</option>
+        <option value={Difficulty.BEGINNER}>かんたん 📚</option>
+        <option value={Difficulty.INTERMEDIATE}>ふつう 🧠</option>
+        <option value={Difficulty.ADVANCED}>むずかしい 🚀</option>
       </select>
     </div>
   );

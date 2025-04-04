@@ -23,7 +23,7 @@ export const SubmitButton: React.FC<Props> = ({ isSubmitting }) => {
         height={20}
         className="mr-2"
       />
-      <p>{isSubmitting ? "作成中..." : "クイズを作成する！"}</p>
+      <p>{isSubmitting ? "クイズの作成中..." : "クイズを作成する！"}</p>
     </button>
   );
 };
