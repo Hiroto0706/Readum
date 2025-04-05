@@ -6,7 +6,7 @@ import { Description } from "@/features/quiz-form/components/description";
 import { QuizResponse } from "@/features/quiz-form/types";
 import { InputForm } from "@/features/quiz-form/components/input-form";
 import { ErrorMessage } from "@/features/quiz-form/components/error-message";
-import { QuizList } from "./components/quiz-list";
+import { QuizList } from "@/features/quiz-form/components/quiz-list";
 
 export const QuizForm: React.FC = () => {
   const [error, setError] = useState("");
@@ -39,7 +39,8 @@ export const QuizForm: React.FC = () => {
       const submissionData = {
         id: quizResponse.id,
         preview: quizResponse.preview,
-        selected_options: selectedOptions,
+        selectedOptions: selectedOptions,
+        difficultyValue: quizResponse.difficultyValue,
       };
 
       // APIを呼び出し

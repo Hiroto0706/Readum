@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React from "react";
 
 export default function ShareButton() {
@@ -16,11 +17,20 @@ export default function ShareButton() {
   };
 
   return (
-    <button
-      onClick={handleShare}
-      className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
-    >
-      シェア用のリンクを作成する
-    </button>
+    <div className="flex justify-center items-center">
+      <button
+        onClick={handleShare}
+        className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-6 rounded-full mb-8 flex justify-center items-center cursor-pointer duration-300 shadow-md"
+      >
+        <Image
+          src="/icons/share.svg"
+          alt="Share icon"
+          width={20}
+          height={20}
+          className="mr-2"
+        />
+        Share
+      </button>
+    </div>
   );
 }

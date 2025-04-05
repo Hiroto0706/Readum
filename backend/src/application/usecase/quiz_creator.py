@@ -199,7 +199,9 @@ class QuizCreator(BaseModel):
             difficulty=difficulty.value,
         )
 
-        return QuizResponse(id=uuid, preview=rag_response)
+        return QuizResponse(
+            id=uuid, preview=rag_response, difficulty_value=difficulty.value
+        )
 
     def _cleanup_resources(
         self, directory_path: str, db_file_handler: DBFileHandler, uuid: str

@@ -81,18 +81,22 @@ class Quiz(BaseModel):
 class QuizResponse(BaseModel):
     id: str = Field(..., description="Quizを識別するための一意のID")
     preview: DomainQuiz = Field(..., description="クイズのプレビュー")
+    difficulty_value: str = Field(description="クイズの難易度", alias="difficultyValue")
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(populate_by_name=True, frozen=True)
 
 
 class UserAnswer(BaseModel):
     id: str = Field(..., description="Quizを識別するための一意のID")
     preview: Quiz = Field(..., description="クイズのプレビュー")
     selected_options: List[str] = Field(
-        ..., description="ユーザーの選択した回答のリスト（A, B, C, D...）"
+        ...,
+        description="ユーザーの選択した回答のリスト（A, B, C, D...）",
+        alias="selectedOptions",
     )
+    difficulty_value: str = Field(description="クイズの難易度", alias="difficultyValue")
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(populate_by_name=True, frozen=True)
 
     @field_validator("selected_options")
     def validate_selected_options(cls, v, info):
