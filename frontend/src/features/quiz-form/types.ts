@@ -19,4 +19,5 @@ export interface Quiz {
 export interface QuizResponse {
   id: string;
   preview: Quiz;
+  difficultyValue: string;
 }

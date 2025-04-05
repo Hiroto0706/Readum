@@ -5,6 +5,21 @@ export enum ResultMessage {
   NEEDS_IMPROVEMENT = "改善の余地あり。もう一度チャレンジ！",
 }
 
+export const DifficultyMessage = {
+  beginner: {
+    value: "やさしい 📚",
+    style: "bg-amber-500",
+  },
+  intermediate: {
+    value: "ふつう 🧠",
+    style: "bg-teal-500",
+  },
+  advanced: {
+    value: "むずかしい🚀",
+    style: "bg-violet-500",
+  },
+} as const;
+
 interface Option {
   A: string;
   B: string;
@@ -26,5 +41,6 @@ interface Quiz {
 export interface UserAnswer {
   id: string;
   preview: Quiz;
-  selected_options: string[];
+  selectedOptions: string[];
+  difficultyValue: string;
 }

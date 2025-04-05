@@ -5,7 +5,11 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { ResultCard } from "@/features/result/components/resultCard";
 import Link from "next/link";
-import { ResultMessage, UserAnswer } from "@/features/result/types";
+import {
+  DifficultyMessage,
+  ResultMessage,
+  UserAnswer,
+} from "@/features/result/types";
 
 interface Props {
   result: UserAnswer;
@@ -20,7 +24,7 @@ export const Result: React.FC<Props> = ({ result }) => {
     const totalQuestions = result.preview.questions.length;
 
     result.preview.questions.forEach((question, index) => {
-      if (result.selected_options[index] === question.answer) {
+      if (result.selectedOptions[index] === question.answer) {
         correctCount++;
       }
     });
@@ -33,6 +37,12 @@ export const Result: React.FC<Props> = ({ result }) => {
   };
 
   const score = calculateScore();
+
+  const difficultyKey = result.difficultyValue
+    ? (result.difficultyValue as keyof typeof DifficultyMessage)
+    : "intermediate";
+  const { value: difficultyValue, style: difficultyStyle } =
+    DifficultyMessage[difficultyKey];
 
   // スコアに基づいてメッセージを取得する関数
   const getResultMessage = (percentage: number): string => {
@@ -88,12 +98,17 @@ export const Result: React.FC<Props> = ({ result }) => {
           {resultMessage}
         </div>
         <div className="p-6 flex flex-col justify-center items-center">
-          <div className="mb-6 font-bold">
-            {/* 📚: amber, 🧠 : teal , 🚀 : violet */}
-            <span className="py-2 px-4 bg-amber-500 rounded-full text-white">
-              かんたん 📚
-            </span>
-          </div>
+          {result.difficultyValue && (
+            <>
+              <div className="mb-6 font-bold">
+                <span
+                  className={`py-2 px-4 rounded-full text-white ${difficultyStyle}`}
+                >
+                  {difficultyValue}
+                </span>
+              </div>
+            </>
+          )}
           <div className="w-36 h-36 bg-emerald-100 rounded-full flex justify-center items-center">
             <p className="font-bold text-4xl text-white w-28 h-28 rounded-full bg-emerald-500 flex justify-center items-center">
               {animatedPercentage}%
@@ -119,7 +134,7 @@ export const Result: React.FC<Props> = ({ result }) => {
             question={question.content}
             answer={question.answer}
             explanation={question.explanation}
-            selectedOptions={result.selected_options}
+            selectedOptions={result.selectedOptions}
           />
         ))}
       </div>

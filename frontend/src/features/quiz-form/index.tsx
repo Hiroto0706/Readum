@@ -39,7 +39,8 @@ export const QuizForm: React.FC = () => {
       const submissionData = {
         id: quizResponse.id,
         preview: quizResponse.preview,
-        selected_options: selectedOptions,
+        selectedOptions: selectedOptions,
+        difficultyValue: quizResponse.difficultyValue,
       };
 
       // APIを呼び出し
