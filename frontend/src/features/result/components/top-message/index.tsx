@@ -6,7 +6,7 @@ interface Props {
   resultMessage: string;
   difficultyValue: string;
   difficultyStyle: string;
-  animatedPercentage: number;
+  percentage: number;
   score: Score;
 }
 
@@ -14,7 +14,7 @@ export const TopMessage: React.FC<Props> = ({
   resultMessage,
   difficultyValue,
   difficultyStyle,
-  animatedPercentage,
+  percentage,
   score,
 }) => {
   return (
@@ -48,7 +48,7 @@ export const TopMessage: React.FC<Props> = ({
           )}
           <div className="w-36 h-36 bg-emerald-100 rounded-full flex justify-center items-center">
             <p className="font-bold text-4xl text-white w-28 h-28 rounded-full bg-emerald-500 flex justify-center items-center">
-              {animatedPercentage}%
+              {percentage}%
             </p>
           </div>
           <p className="mt-6 space-x-2 flex justify-center items-center">

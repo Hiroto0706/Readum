@@ -86,7 +86,7 @@ export const Result: React.FC<Props> = ({ result }) => {
         resultMessage={resultMessage}
         difficultyValue={difficultyValue}
         difficultyStyle={difficultyStyle}
-        animatedPercentage={animatedPercentage}
+        percentage={animatedPercentage}
         score={score}
       />
 
