@@ -18,7 +18,7 @@ export default function RootLayout({
       <body className="max-w-[800px] mx-auto">
         <Header />
 
-        <main className="text-emerald-900 mt-16 mb-32">{children}</main>
+        <main className="text-emerald-900 mt-16">{children}</main>
 
         <Footer />
       </body>
