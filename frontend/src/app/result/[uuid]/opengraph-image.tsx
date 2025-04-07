@@ -79,20 +79,13 @@ export default async function Image({ params }: Props) {
     );
   }
 
-  // スコアを計算
   const score: Score = calculateScore(result);
-
-  // 結果メッセージを取得
   const resultMessage = getResultMessage(score.percentage);
-
-  // 難易度スタイルを取得
   const difficultyKey =
     (result.difficultyValue as keyof typeof DifficultyMessage) ||
     "intermediate";
-  const difficultyInfo =
-    DifficultyMessage[difficultyKey] || DifficultyMessage.intermediate;
-  const difficultyValue = difficultyInfo.value;
-  const difficultyStyle = difficultyInfo.style;
+  const { value: difficultyValue, style: difficultyStyle } =
+    DifficultyMessage[difficultyKey];
 
   // Tailwindクラス名からCSSの色に変換
   let bgColor = "#14b8a6"; // デフォルト teal-500
@@ -115,7 +108,6 @@ export default async function Image({ params }: Props) {
           overflow: "hidden",
         }}
       >
-        {/* ヘッダー部分 */}
         <div
           style={{
             width: "100%",
@@ -123,7 +115,7 @@ export default async function Image({ params }: Props) {
             color: "white",
             fontWeight: "bold",
             fontSize: "40px",
-            padding: "30px 20px",
+            padding: "24px 20px",
             textAlign: "center",
             wordBreak: "break-word",
             display: "flex",
@@ -133,8 +125,6 @@ export default async function Image({ params }: Props) {
         >
           {resultMessage}
         </div>
-
-        {/* コンテンツ部分 */}
         <div
           style={{
             width: "100%",
@@ -147,11 +137,10 @@ export default async function Image({ params }: Props) {
             padding: "30px 20px",
           }}
         >
-          {/* 難易度バッジ */}
           {difficultyValue && (
             <div
               style={{
-                marginBottom: "30px",
+                marginBottom: "32px",
                 fontWeight: "bold",
                 display: "flex",
                 justifyContent: "center",
@@ -159,7 +148,7 @@ export default async function Image({ params }: Props) {
             >
               <span
                 style={{
-                  padding: "12px 30px",
+                  padding: "8px 24px",
                   borderRadius: "9999px",
                   backgroundColor: bgColor,
                   color: "white",
@@ -173,8 +162,6 @@ export default async function Image({ params }: Props) {
               </span>
             </div>
           )}
-
-          {/* パーセンテージの円 */}
           <div
             style={{
               width: "240px",
@@ -204,8 +191,6 @@ export default async function Image({ params }: Props) {
               {score.percentage}%
             </div>
           </div>
-
-          {/* スコア表示 */}
           <div
             style={{
               display: "flex",
