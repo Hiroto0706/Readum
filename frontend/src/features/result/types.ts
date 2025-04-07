@@ -44,3 +44,9 @@ export interface UserAnswer {
   selectedOptions: string[];
   difficultyValue: string;
 }
+
+export interface Score {
+  correct: number;
+  total: number;
+  percentage: number;
+}

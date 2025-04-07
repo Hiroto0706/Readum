@@ -24,7 +24,7 @@ export const QuizList: React.FC<Props> = ({
   const answeredCount = Object.keys(userAnswers).length;
 
   return (
-    <div className="pt-8 mx-2">
+    <div className="pt-8 mx-2 mb-16">
       <h2 className="text-xl font-bold flex items-center text-emerald-500 mb-6">
         <Image
           src="/icons/star.svg"

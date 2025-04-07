@@ -1,15 +1,16 @@
 "use client";
 
 import ShareButton from "@/components/share-link";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { ResultCard } from "@/features/result/components/resultCard";
+import { ResultCard } from "@/features/result/components/result-card";
 import Link from "next/link";
 import {
   DifficultyMessage,
   ResultMessage,
+  Score,
   UserAnswer,
 } from "@/features/result/types";
+import { TopMessage } from "@/features/result/components/top-message";
 
 interface Props {
   result: UserAnswer;
@@ -18,8 +19,7 @@ interface Props {
 export const Result: React.FC<Props> = ({ result }) => {
   const [animatedPercentage, setAnimatedPercentage] = useState(0);
 
-  // 正答率を計算
-  const calculateScore = () => {
+  const calculateScore = (): Score => {
     let correctCount = 0;
     const totalQuestions = result.preview.questions.length;
 
@@ -36,7 +36,7 @@ export const Result: React.FC<Props> = ({ result }) => {
     };
   };
 
-  const score = calculateScore();
+  const score: Score = calculateScore();
 
   const difficultyKey = result.difficultyValue
     ? (result.difficultyValue as keyof typeof DifficultyMessage)
@@ -82,46 +82,13 @@ export const Result: React.FC<Props> = ({ result }) => {
 
   return (
     <div className="container mx-auto px-2 md:px-4 py-6">
-      <h1 className="text-2xl font-bold mb-4 flex items-center">
-        <Image
-          src="/icons/star.svg"
-          alt="Generate icon"
-          width={28}
-          height={28}
-          className="mr-2"
-        />
-        クイズ結果
-      </h1>
-
-      <div className="rounded-lg text-center mb-8 shadow">
-        <div className="w-full bg-emerald-500 rounded-t-lg text-white font-bold text-lg md:text-xl py-4 px-2 break-words">
-          {resultMessage}
-        </div>
-        <div className="p-6 flex flex-col justify-center items-center">
-          {result.difficultyValue && (
-            <>
-              <div className="mb-6 font-bold">
-                <span
-                  className={`py-2 px-4 rounded-full text-white ${difficultyStyle}`}
-                >
-                  {difficultyValue}
-                </span>
-              </div>
-            </>
-          )}
-          <div className="w-36 h-36 bg-emerald-100 rounded-full flex justify-center items-center">
-            <p className="font-bold text-4xl text-white w-28 h-28 rounded-full bg-emerald-500 flex justify-center items-center">
-              {animatedPercentage}%
-            </p>
-          </div>
-          <p className="mt-6 space-x-2 flex justify-center items-center">
-            <span className="text-3xl font-bold text-emerald-500">
-              {score.correct} / {score.total}
-            </span>
-            <span className="font-bold">correct</span>
-          </p>
-        </div>
-      </div>
+      <TopMessage
+        resultMessage={resultMessage}
+        difficultyValue={difficultyValue}
+        difficultyStyle={difficultyStyle}
+        percentage={animatedPercentage}
+        score={score}
+      />
 
       <ShareButton />
 

@@ -5,7 +5,6 @@ import React from "react";
 
 async function fetchResult(uuid: string) {
   try {
-    // APIエンドポイントからデータを取得
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_SERVER_SIDE_URL}/result/${uuid}`
     );
