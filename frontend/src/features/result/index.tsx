@@ -11,6 +11,7 @@ import {
   UserAnswer,
 } from "@/features/result/types";
 import { TopMessage } from "@/features/result/components/top-message";
+import Image from "next/image";
 
 interface Props {
   result: UserAnswer;
@@ -82,6 +83,17 @@ export const Result: React.FC<Props> = ({ result }) => {
 
   return (
     <div className="container mx-auto px-2 md:px-4 py-6">
+      <h1 className="text-2xl font-bold mb-4 flex items-center">
+        <Image
+          src="/icons/star.svg"
+          alt="Generate icon"
+          width={28}
+          height={28}
+          className="mr-2"
+        />
+        クイズ結果
+      </h1>
+
       <TopMessage
         resultMessage={resultMessage}
         difficultyValue={difficultyValue}
