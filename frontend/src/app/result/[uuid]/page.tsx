@@ -1,9 +1,9 @@
 import { Result } from "@/features/result";
 import { UserAnswer } from "@/features/result/types";
 import { notFound } from "next/navigation";
-import React from "react";
+import React, { cache } from "react";
 
-async function fetchResult(uuid: string) {
+export const fetchResult = cache(async (uuid: string): Promise<UserAnswer> => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_SERVER_SIDE_URL}/result/${uuid}`
@@ -21,7 +21,7 @@ async function fetchResult(uuid: string) {
     console.error("Error fetching result:", error);
     throw error;
   }
-}
+});
 
 interface Props {
   params: Promise<{ uuid: string }>;
