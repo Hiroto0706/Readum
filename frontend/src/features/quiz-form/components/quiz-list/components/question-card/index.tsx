@@ -54,7 +54,7 @@ export const QuestionCard: React.FC<Props> = ({
                   <div className="absolute w-3 md:w-4 h-3 md:h-4 bg-emerald-500 rounded-full pointer-events-none"></div>
                 )}
               </div>
-              <span className="ml-2">{value}</span>
+              <span className="ml-2 text-base">{value}</span>
             </label>
           </div>
         ))}

@@ -11,6 +11,8 @@ import {
   UserAnswer,
 } from "@/features/result/types";
 import { TopMessage } from "@/features/result/components/top-message";
+import Image from "next/image";
+import { calculateScore, getResultMessage } from "./utils";
 
 interface Props {
   result: UserAnswer;
@@ -19,43 +21,13 @@ interface Props {
 export const Result: React.FC<Props> = ({ result }) => {
   const [animatedPercentage, setAnimatedPercentage] = useState(0);
 
-  const calculateScore = (): Score => {
-    let correctCount = 0;
-    const totalQuestions = result.preview.questions.length;
-
-    result.preview.questions.forEach((question, index) => {
-      if (result.selectedOptions[index] === question.answer) {
-        correctCount++;
-      }
-    });
-
-    return {
-      correct: correctCount,
-      total: totalQuestions,
-      percentage: Math.round((correctCount / totalQuestions) * 100),
-    };
-  };
-
-  const score: Score = calculateScore();
+  const score: Score = calculateScore(result);
 
   const difficultyKey = result.difficultyValue
     ? (result.difficultyValue as keyof typeof DifficultyMessage)
     : "intermediate";
   const { value: difficultyValue, style: difficultyStyle } =
     DifficultyMessage[difficultyKey];
-
-  // スコアに基づいてメッセージを取得する関数
-  const getResultMessage = (percentage: number): string => {
-    if (percentage === 100) {
-      return ResultMessage.PERFECT;
-    } else if (percentage >= 66) {
-      return ResultMessage.EXCELLENT;
-    } else if (percentage >= 33) {
-      return ResultMessage.GOOD;
-    } else {
-      return ResultMessage.NEEDS_IMPROVEMENT;
-    }
-  };
 
   const resultMessage = getResultMessage(score.percentage);
 
@@ -82,6 +54,17 @@ export const Result: React.FC<Props> = ({ result }) => {
 
   return (
     <div className="container mx-auto px-2 md:px-4 py-6">
+      <h1 className="text-2xl font-bold mb-4 flex items-center">
+        <Image
+          src="/icons/star.svg"
+          alt="Generate icon"
+          width={28}
+          height={28}
+          className="mr-2"
+        />
+        クイズ結果
+      </h1>
+
       <TopMessage
         resultMessage={resultMessage}
         difficultyValue={difficultyValue}

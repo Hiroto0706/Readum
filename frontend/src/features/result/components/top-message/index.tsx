@@ -1,4 +1,3 @@
-import Image from "next/image";
 import React from "react";
 import { Score } from "@/features/result/types";
 
@@ -19,17 +18,6 @@ export const TopMessage: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4 flex items-center">
-        <Image
-          src="/icons/star.svg"
-          alt="Generate icon"
-          width={28}
-          height={28}
-          className="mr-2"
-        />
-        クイズ結果
-      </h1>
-
       <div className="rounded-lg text-center mb-8 shadow">
         <div className="w-full bg-emerald-500 rounded-t-lg text-white font-bold text-lg md:text-xl py-4 px-2 break-words">
           {resultMessage}
