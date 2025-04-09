@@ -33,11 +33,13 @@ export const QuestionCard: React.FC<Props> = ({
         {Object.entries(options).map(([key, value]) => (
           <div key={key}>
             <label
-              className={`flex items-center border rounded-lg p-3 cursor-pointer ${
+              className={`flex items-center border rounded-lg p-3 duration-300 ${
+                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+              } ${
                 userAnswers[qIndex] === key
                   ? "bg-emerald-50 border-emerald-500"
-                  : "border-gray-300 hover:bg-gray-100"
-              } duration-300`}
+                  : `border-gray-300 ${isSubmitted ? "" : "hover:bg-gray-100"}`
+              }`}
             >
               <div className="relative flex items-center justify-center">
                 <input

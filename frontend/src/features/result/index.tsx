@@ -89,12 +89,19 @@ export const Result: React.FC<Props> = ({ result }) => {
         ))}
       </div>
 
-      <div className="mt-6 flex justify-end">
+      <div className="my-12 flex justify-center items-center">
         <Link
           href="/"
-          className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded"
+          className="bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-bold py-3 rounded-full w-full flex justify-center items-center"
         >
-          TOP
+          <Image
+            src="/icons/generate.svg"
+            alt="Generate icon"
+            width={20}
+            height={20}
+            className="mr-2"
+          />
+          さらにクイズを続ける
         </Link>
       </div>
     </div>
