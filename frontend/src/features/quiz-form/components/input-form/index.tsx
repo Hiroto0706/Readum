@@ -58,7 +58,8 @@ export const InputForm: React.FC<Props> = ({
           setIsSubmitting(false);
           return;
         }
-      } catch (e) {
+      } catch (error) {
+        console.error("URL検証エラー:", error);
         setError("有効なURLを入力してください");
         setIsSubmitting(false);
         return;
