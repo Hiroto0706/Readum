@@ -13,11 +13,14 @@ export const Description: React.FC = () => {
               であなたの読書を可視化しよう！
             </p>
           </div>
-          <p className="text-gray-600 max-w-2xl text-sm">
+          <p className="text-gray-600 max-w-2xl mb-4">
             Readumは生成AIテクノロジーを活用したクイズ生成アプリケーションです。
             <br></br>
             あなたの読書メモや学習内容をフォームに入力して送信するだけで、AIが自動的にあなたの理解度を測るためのオリジナルクイズを作成してくれます。
           </p>
+          <span className="text-gray-500 text-sm">
+            ※クイズの内容は毎回ランダムに生成されます。同じメモでも違う視点からの出題が楽しめます。
+          </span>
         </div>
       </section>
     </>
