@@ -7,7 +7,7 @@ import { QuizResponse } from "@/features/quiz-form/types";
 import { InputForm } from "@/features/quiz-form/components/input-form";
 import { ErrorMessage } from "@/features/quiz-form/components/error-message";
 import { QuizList } from "@/features/quiz-form/components/quiz-list";
-import { BASE_URL } from "@/utils";
+import { submitQuiz } from "@/features/quiz-form/actions";
 
 export const QuizForm: React.FC = () => {
   const [error, setError] = useState("");
@@ -44,26 +44,16 @@ export const QuizForm: React.FC = () => {
         difficultyValue: quizResponse.difficultyValue,
       };
 
-      // APIを呼び出し
-      const response = await fetch(`${BASE_URL}/quiz/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      const result = await submitQuiz(submissionData);
 
-      if (response.ok) {
-        const data = await response.json();
-        router.push(`/result/${data.uuid}`);
+      if (result.uuid) {
+        router.push(`/result/${result.uuid}`);
       } else {
         throw new Error("APIからのレスポンスが正常ではありません");
       }
     } catch (error) {
       console.error("回答の送信中にエラーが発生しました:", error);
-      // ユーザー体験を損なわないため、エラーが発生しても採点結果は表示する
-      // 必要に応じてここでエラー通知を表示することも可能
-      alert("回答の送信中にエラーが発生しました");
+      setError("回答の送信中にエラーが発生しました");
     }
   };
 

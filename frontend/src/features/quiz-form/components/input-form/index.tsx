@@ -11,7 +11,7 @@ import {
   Difficulty,
   QuizType,
 } from "@/features/quiz-form/components/input-form/types";
-import { BASE_URL } from "@/utils";
+import { createQuiz } from "@/features/quiz-form/components/input-form/actions";
 
 interface Props {
   setUserAnswers: React.Dispatch<React.SetStateAction<Record<number, string>>>;
@@ -68,25 +68,17 @@ export const InputForm: React.FC<Props> = ({
     }
 
     try {
-      const response = await fetch(BASE_URL + "/quiz/create_quiz", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: quizType,
-          content,
-          difficulty,
-          questionCount,
-        }),
+      const result = await createQuiz({
+        quizType: quizType,
+        content,
+        difficulty,
+        questionCount,
       });
-
-      if (!response.ok) {
+      if (result.data) {
+        setQuizResponse(result.data);
+      } else {
         throw new Error("クイズの作成に失敗しました");
       }
-
-      const data = await response.json();
-      setQuizResponse(data);
     } catch (error) {
       console.error("Error:", error);
       setError("クイズの作成中にエラーが発生しました");

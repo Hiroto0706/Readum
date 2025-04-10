@@ -43,21 +43,42 @@ export const DifficultyLevel: React.FC<Props> = ({
         <button
           type="button"
           onClick={() => setDifficulty(Difficulty.BEGINNER)}
-          className={`font-bold text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border cursor-pointer duration-300 mr-2 ${DifficultyMessage.beginner.style} ${DifficultyMessage.beginner.hovered}`}
+          className={`font-bold text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border text-xs md:text-base  duration-300 mr-2 ${
+            DifficultyMessage.beginner.style
+          } ${
+            isSubmitting
+              ? "cursor-not-allowed"
+              : `cursor-pointer ${DifficultyMessage.beginner.hovered}`
+          }`}
+          disabled={isSubmitting}
         >
           {DifficultyMessage.beginner.value}
         </button>
         <button
           type="button"
           onClick={() => setDifficulty(Difficulty.INTERMEDIATE)}
-          className={`font-bold text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border cursor-pointer duration-300 mx-2 ${DifficultyMessage.intermediate.style} ${DifficultyMessage.intermediate.hovered}`}
+          className={`font-bold text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border text-xs md:text-base duration-300 mx-2 ${
+            DifficultyMessage.intermediate.style
+          } ${
+            isSubmitting
+              ? "cursor-not-allowed"
+              : `cursor-pointer ${DifficultyMessage.intermediate.hovered}`
+          }`}
+          disabled={isSubmitting}
         >
           {DifficultyMessage.intermediate.value}
         </button>
         <button
           type="button"
           onClick={() => setDifficulty(Difficulty.ADVANCED)}
-          className={`font-bold text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border cursor-pointer duration-300 ml-2 ${DifficultyMessage.advanced.style} ${DifficultyMessage.advanced.hovered}`}
+          className={`font-bold text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border text-xs md:text-base  duration-300 ml-2 ${
+            DifficultyMessage.advanced.style
+          } ${
+            isSubmitting
+              ? "cursor-not-allowed"
+              : `cursor-pointer ${DifficultyMessage.advanced.hovered}`
+          }`}
+          disabled={isSubmitting}
         >
           {DifficultyMessage.advanced.value}
         </button>
