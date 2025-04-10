@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/config";
 import { DifficultyMessage, Score, UserAnswer } from "@/features/result/types";
 import { calculateScore, getResultMessage } from "@/features/result/utils";
 import { ImageResponse } from "next/og";
@@ -14,10 +15,7 @@ export const contentType = "image/png";
 
 const fetchResult = cache(async (uuid: string): Promise<UserAnswer | null> => {
   try {
-    // BASE_URLとするとエラーになるので直接変数を使用している
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/result/${uuid}`
-    );
+    const response = await fetch(`${BASE_URL}/result/${uuid}`);
 
     if (!response.ok) return null;
     return await response.json();

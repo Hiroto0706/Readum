@@ -1,6 +1,6 @@
 import { Result } from "@/features/result";
 import { UserAnswer } from "@/features/result/types";
-import { BASE_URL } from "@/utils";
+import { BASE_URL } from "@/config";
 import { notFound } from "next/navigation";
 import React, { cache } from "react";
 

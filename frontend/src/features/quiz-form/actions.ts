@@ -1,6 +1,6 @@
 "use server";
 
-import { BASE_URL } from "@/utils";
+import { BASE_URL } from "@/config";
 import { Quiz } from "@/features/quiz-form/types";
 
 export async function submitQuiz(formData: {
