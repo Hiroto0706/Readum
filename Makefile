@@ -9,3 +9,7 @@ server:
 .PHONY: build
 build:
 	docker compose up --build
+
+.PHONY: server-as-prd
+server-as-prd:
+	docker compose -f docker-compose.prd.yml up --build
