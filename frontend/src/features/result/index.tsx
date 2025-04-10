@@ -4,15 +4,10 @@ import ShareButton from "@/components/share-link";
 import React, { useEffect, useState } from "react";
 import { ResultCard } from "@/features/result/components/result-card";
 import Link from "next/link";
-import {
-  DifficultyMessage,
-  ResultMessage,
-  Score,
-  UserAnswer,
-} from "@/features/result/types";
+import { DifficultyMessage, Score, UserAnswer } from "@/features/result/types";
 import { TopMessage } from "@/features/result/components/top-message";
 import Image from "next/image";
-import { calculateScore, getResultMessage } from "./utils";
+import { calculateScore, getResultMessage } from "@/features/result/utils";
 
 interface Props {
   result: UserAnswer;

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Page({ error }: { error: Error }) {
   return (
-    <div className="text-center py-48">
+    <div className="text-center py-48 mx-2">
       <h1 className="text-2xl font-bold">500エラー</h1>
       <p className="pt-8 pb-4">予期せぬエラーが発生しました。</p>
 

@@ -2,9 +2,10 @@
 FROM node:22-alpine AS developer
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install
-RUN npm install @tailwindcss/oxide-linux-arm64-musl
+RUN npm ci
 COPY . .
+
+ENV NODE_ENV development
 CMD ["npm", "run", "dev"]
 
 # Install dependencies only when needed

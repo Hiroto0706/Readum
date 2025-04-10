@@ -11,6 +11,7 @@ import {
   Difficulty,
   QuizType,
 } from "@/features/quiz-form/components/input-form/types";
+import { createQuiz } from "@/features/quiz-form/components/input-form/actions";
 
 interface Props {
   setUserAnswers: React.Dispatch<React.SetStateAction<Record<number, string>>>;
@@ -58,7 +59,8 @@ export const InputForm: React.FC<Props> = ({
           setIsSubmitting(false);
           return;
         }
-      } catch (e) {
+      } catch (error) {
+        console.error("URL検証エラー:", error);
         setError("有効なURLを入力してください");
         setIsSubmitting(false);
         return;
@@ -66,28 +68,17 @@ export const InputForm: React.FC<Props> = ({
     }
 
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/quiz/create_quiz",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: quizType,
-            content,
-            difficulty,
-            questionCount,
-          }),
-        }
-      );
-
-      if (!response.ok) {
+      const result = await createQuiz({
+        quizType: quizType,
+        content,
+        difficulty,
+        questionCount,
+      });
+      if (result.data) {
+        setQuizResponse(result.data);
+      } else {
         throw new Error("クイズの作成に失敗しました");
       }
-
-      const data = await response.json();
-      setQuizResponse(data);
     } catch (error) {
       console.error("Error:", error);
       setError("クイズの作成中にエラーが発生しました");
@@ -97,7 +88,7 @@ export const InputForm: React.FC<Props> = ({
   };
 
   return (
-    <div className="shadow-xl rounded-2xl mb-16 truncate mx-2 md:mx-0">
+    <div className="shadow-xl rounded-2xl mb-32 truncate mx-2 md:mx-0">
       <div className="flex justify-center py-3 text-center font-bold text-lg text-white bg-emerald-500">
         <Image
           src="/icons/generate.svg"
