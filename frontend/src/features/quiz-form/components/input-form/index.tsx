@@ -11,6 +11,7 @@ import {
   Difficulty,
   QuizType,
 } from "@/features/quiz-form/components/input-form/types";
+import { BASE_URL } from "@/utils";
 
 interface Props {
   setUserAnswers: React.Dispatch<React.SetStateAction<Record<number, string>>>;
@@ -67,21 +68,18 @@ export const InputForm: React.FC<Props> = ({
     }
 
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/quiz/create_quiz",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: quizType,
-            content,
-            difficulty,
-            questionCount,
-          }),
-        }
-      );
+      const response = await fetch(BASE_URL + "/quiz/create_quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: quizType,
+          content,
+          difficulty,
+          questionCount,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("クイズの作成に失敗しました");
@@ -98,7 +96,7 @@ export const InputForm: React.FC<Props> = ({
   };
 
   return (
-    <div className="shadow-xl rounded-2xl mb-16 truncate mx-2 md:mx-0">
+    <div className="shadow-xl rounded-2xl mb-32 truncate mx-2 md:mx-0">
       <div className="flex justify-center py-3 text-center font-bold text-lg text-white bg-emerald-500">
         <Image
           src="/icons/generate.svg"

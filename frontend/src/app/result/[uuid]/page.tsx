@@ -1,13 +1,12 @@
 import { Result } from "@/features/result";
 import { UserAnswer } from "@/features/result/types";
+import { BASE_URL } from "@/utils";
 import { notFound } from "next/navigation";
 import React, { cache } from "react";
 
 const fetchResult = cache(async (uuid: string): Promise<UserAnswer> => {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_SERVER_SIDE_URL}/result/${uuid}`
-    );
+    const response = await fetch(`${BASE_URL}/result/${uuid}`);
 
     if (!response.ok) {
       if (response.status === 404) {

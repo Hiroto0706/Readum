@@ -7,7 +7,7 @@ import Link from "next/link";
 import { DifficultyMessage, Score, UserAnswer } from "@/features/result/types";
 import { TopMessage } from "@/features/result/components/top-message";
 import Image from "next/image";
-import { calculateScore, getResultMessage } from "./utils";
+import { calculateScore, getResultMessage } from "@/features/result/utils";
 
 interface Props {
   result: UserAnswer;

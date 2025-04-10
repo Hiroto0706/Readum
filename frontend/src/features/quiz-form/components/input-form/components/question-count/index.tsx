@@ -35,21 +35,21 @@ export const QuestionCount: React.FC<Props> = ({
         <button
           type="button"
           onClick={() => setQuestionCount(3)}
-          className="font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border pointer-cursor duration-300 mr-2"
+          className="font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border cursor-pointer duration-300 mr-2"
         >
           3問
         </button>
         <button
           type="button"
           onClick={() => setQuestionCount(5)}
-          className="font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border pointer-cursor duration-300 mx-2"
+          className="font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border cursor-pointer duration-300 mx-2"
         >
           5問
         </button>
         <button
           type="button"
           onClick={() => setQuestionCount(10)}
-          className="font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border pointer-cursor duration-300 ml-2"
+          className="font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-full my-3 py-1 px-3 w-[calc(33%-8px)] box-border cursor-pointer duration-300 ml-2"
         >
           10問
         </button>

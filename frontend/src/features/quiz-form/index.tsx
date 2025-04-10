@@ -7,6 +7,7 @@ import { QuizResponse } from "@/features/quiz-form/types";
 import { InputForm } from "@/features/quiz-form/components/input-form";
 import { ErrorMessage } from "@/features/quiz-form/components/error-message";
 import { QuizList } from "@/features/quiz-form/components/quiz-list";
+import { BASE_URL } from "@/utils";
 
 export const QuizForm: React.FC = () => {
   const [error, setError] = useState("");
@@ -44,16 +45,13 @@ export const QuizForm: React.FC = () => {
       };
 
       // APIを呼び出し
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/quiz/submit`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(submissionData),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/quiz/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      });
 
       if (response.ok) {
         const data = await response.json();

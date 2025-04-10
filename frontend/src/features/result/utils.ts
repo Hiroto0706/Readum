@@ -1,4 +1,4 @@
-import { ResultMessage, Score, UserAnswer } from "./types";
+import { ResultMessage, Score, UserAnswer } from "@/features/result/types";
 
 export const calculateScore = (result: UserAnswer): Score => {
   let correctCount = 0;

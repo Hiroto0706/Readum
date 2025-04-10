@@ -5,6 +5,8 @@ COPY package.json package-lock.json ./
 RUN npm install
 RUN npm install @tailwindcss/oxide-linux-arm64-musl
 COPY . .
+
+ENV NODE_ENV development
 CMD ["npm", "run", "dev"]
 
 # Install dependencies only when needed
