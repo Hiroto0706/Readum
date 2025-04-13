@@ -12,6 +12,9 @@ interface Props {
   setContent: (value: React.SetStateAction<string>) => void;
 }
 
+const DISABLED_CRAWL =
+  process.env.NEXT_PUBLIC_DISABLED_CRAWL === "true" ? true : false;
+
 export const TextArea: React.FC<Props> = ({
   setQuizType,
   isSubmitting,
@@ -42,10 +45,14 @@ export const TextArea: React.FC<Props> = ({
         <button
           type="button"
           onClick={() => setQuizType(QuizType.URL)}
-          disabled={isSubmitting}
+          disabled={isSubmitting || DISABLED_CRAWL}
           className={`flex-1 py-2 px-4 flex justify-center items-center rounded-md duration-300 ${
             quizType === "url" ? "bg-emerald-500 text-white" : ""
-          } ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+          } ${
+            isSubmitting || DISABLED_CRAWL
+              ? "cursor-not-allowed"
+              : "cursor-pointer"
+          }`}
         >
           <Image
             src={`/icons/web${quizType === "url" ? "-active" : ""}.svg`}
