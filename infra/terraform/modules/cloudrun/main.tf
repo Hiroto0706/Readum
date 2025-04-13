@@ -30,8 +30,8 @@ resource "google_cloud_run_v2_service" "readum_frontend" {
         value = "production"
       }
       env {
-        name  = "NEXT_PUBLIC_API_URL"
-        value = var.NEXT_PUBLIC_API_URL
+        name  = "API_ENDPOINT"
+        value = var.API_ENDPOINT
       }
       env {
         name  = "NEXT_PUBLIC_MAX_QUESTION_COUNT"
@@ -42,8 +42,8 @@ resource "google_cloud_run_v2_service" "readum_frontend" {
         value = var.NEXT_PUBLIC_MIN_QUESTION_COUNT
       }
       env {
-        name  = "NEXT_PUBLIC_DISABLED_CRAWL"
-        value = var.NEXT_PUBLIC_DISABLED_CRAWL
+        name  = "DISABLED_CRAWL"
+        value = var.DISABLED_CRAWL
       }
     }
 
@@ -146,5 +146,5 @@ resource "google_cloud_run_v2_service_iam_member" "backend_access" {
   name     = google_cloud_run_v2_service.readum_backend.name
   location = google_cloud_run_v2_service.readum_backend.location
   role     = "roles/run.invoker"
-  member   = "serviceAccount:${var.service_account_email}"
+  member   = "allUsers"
 }

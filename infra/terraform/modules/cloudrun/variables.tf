@@ -31,7 +31,7 @@ variable "vpc_connector_id" {
 ###########################################################
 # 環境変数の設定
 ###########################################################
-variable "NEXT_PUBLIC_API_URL" {
+variable "API_ENDPOINT" {
   description = "バックエンドのAPIエンドポイント"
   type        = string
 }
@@ -43,7 +43,7 @@ variable "NEXT_PUBLIC_MIN_QUESTION_COUNT" {
   description = "フロントエンド側で生成できる問題数の最低値"
   type        = number
 }
-variable "NEXT_PUBLIC_DISABLED_CRAWL" {
+variable "DISABLED_CRAWL" {
   description = "クローリング機能をdisabledにするかどうか"
   type        = bool
 }

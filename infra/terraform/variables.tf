@@ -58,7 +58,7 @@ variable "storage_roles" {
 ###########################################################
 # 環境変数の設定
 ###########################################################
-variable "NEXT_PUBLIC_API_URL" {
+variable "API_ENDPOINT" {
   description = "バックエンドのAPIエンドポイント"
   type        = string
 }
@@ -72,7 +72,7 @@ variable "NEXT_PUBLIC_MIN_QUESTION_COUNT" {
   type        = number
   default     = 3
 }
-variable "NEXT_PUBLIC_DISABLED_CRAWL" {
+variable "DISABLED_CRAWL" {
   description = "クローリング機能をdisabledにするかどうか"
   type        = bool
   default     = true

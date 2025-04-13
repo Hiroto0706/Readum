@@ -38,10 +38,10 @@ module "cloudrun" {
 
   # 環境変数
   # フロントエンド環境変数
-  NEXT_PUBLIC_API_URL            = var.NEXT_PUBLIC_API_URL
+  API_ENDPOINT                   = var.API_ENDPOINT
   NEXT_PUBLIC_MAX_QUESTION_COUNT = var.NEXT_PUBLIC_MAX_QUESTION_COUNT
   NEXT_PUBLIC_MIN_QUESTION_COUNT = var.NEXT_PUBLIC_MIN_QUESTION_COUNT
-  NEXT_PUBLIC_DISABLED_CRAWL     = var.NEXT_PUBLIC_DISABLED_CRAWL
+  DISABLED_CRAWL                 = var.DISABLED_CRAWL
 
   # バックエンド環境変数
   ENV                   = var.ENV
