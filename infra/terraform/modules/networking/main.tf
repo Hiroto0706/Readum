@@ -9,4 +9,7 @@ resource "google_vpc_access_connector" "connector" {
   region        = var.region
   network       = google_compute_network.vpc_network.id
   ip_cidr_range = "10.20.0.0/28"
+  machine_type  = "e2-micro"
+  max_instances = 3
+  min_instances = 2
 }

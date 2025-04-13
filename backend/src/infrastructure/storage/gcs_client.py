@@ -26,7 +26,7 @@ class GCSClient(StorageService):
             bucket_name (str): 保存先のバケット名
         """
         storage_client = storage.Client()
-        bucket_name = "readum"
+        bucket_name = settings.third_party.BUCKET_NAME
         env = settings.app.ENV
         prefix = f"{env}/results/"
 

@@ -40,13 +40,13 @@ variable "connector_name" {
 variable "frontend_service_name" {
   description = "フロントエンドのCloud Run名"
   type        = string
-  default     = "readum_frontend"
+  default     = "readum-frontend"
 }
 
 variable "backend_service_name" {
   description = "バックエンドのCloud Run名"
   type        = string
-  default     = "readum_backend"
+  default     = "readum-backend"
 }
 
 variable "storage_roles" {
@@ -111,6 +111,7 @@ variable "additional_env_vars" {
     SEARCH_KWARGS                  = "8"
     CHUNK_SIZE                     = "2000"
     CHUNK_OVERLAP                  = "100"
+    BUCKET_NAME                    = "readum-storage"
     GOOGLE_APPLICATION_CREDENTIALS = "./credential.json"
   }
 }

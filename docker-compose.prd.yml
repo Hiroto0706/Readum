@@ -12,6 +12,7 @@ services:
       - ./backend/.env
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/credential.json
+      - PORT=8080
     networks:
       - readum-network
 
@@ -22,6 +23,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      - PORT=3000
     networks:
       - readum-network
     depends_on:

@@ -5,6 +5,14 @@ resource "google_cloud_run_v2_service" "readum_frontend" {
   name     = var.frontend_service_name
   location = var.region
 
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image,
+    ]
+  }
+
   template {
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/readum-repo/readum-frontend:latest"
@@ -64,6 +72,14 @@ resource "google_cloud_run_v2_service" "readum_backend" {
   name     = var.backend_service_name
   location = var.region
   ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY" # VPC内部からのアクセスのみ許可
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image,
+    ]
+  }
 
   template {
     containers {

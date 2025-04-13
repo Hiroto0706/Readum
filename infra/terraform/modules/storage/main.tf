@@ -1,5 +1,3 @@
-# 既存のCloud Storageバケットをインポート
-# 注: 実行前に `terraform import module.storage.google_storage_bucket.readum_bucket readum` を実行する必要があります
 resource "google_storage_bucket" "readum_bucket" {
   name     = var.storage_bucket_name
   location = var.region

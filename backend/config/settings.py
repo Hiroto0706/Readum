@@ -70,6 +70,7 @@ class ThirdPartySettings(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     FIRECRAWL_API_KEY: Final[str] = os.getenv("FIRECRAWL_API_KEY")
+    BUCKET_NAME: Final[str] = os.getenv("BUCKET_NAME")
 
 
 class Settings(BaseModel):

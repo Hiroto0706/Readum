@@ -1,8 +1,7 @@
 # サービスアカウント
-resource "google_service_account" "service_account" {
-  account_id   = var.service_account_id
-  display_name = var.service_account_display_name
-  project      = var.project_id
+data "google_service_account" "service_account" {
+  account_id = var.service_account_id
+  project    = var.project_id
 }
 
 # ネットワークモジュール
@@ -23,7 +22,7 @@ module "storage" {
   storage_bucket_name   = var.storage_bucket_name
   region                = var.region
   storage_roles         = var.storage_roles
-  service_account_email = google_service_account.service_account.email
+  service_account_email = data.google_service_account.service_account.email
 }
 
 # Cloud Runモジュール
@@ -34,7 +33,7 @@ module "cloudrun" {
   region                = var.region
   frontend_service_name = var.frontend_service_name
   backend_service_name  = var.backend_service_name
-  service_account_email = google_service_account.service_account.email
+  service_account_email = data.google_service_account.service_account.email
   vpc_connector_id      = module.networking.vpc_connector_id
 
   # 環境変数
