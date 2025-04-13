@@ -37,6 +37,20 @@ module "cloudrun" {
   service_account_email = google_service_account.service_account.email
   vpc_connector_id      = module.networking.vpc_connector_id
 
+  # 環境変数
+  # フロントエンド環境変数
+  NEXT_PUBLIC_API_URL            = var.NEXT_PUBLIC_API_URL
+  NEXT_PUBLIC_MAX_QUESTION_COUNT = var.NEXT_PUBLIC_MAX_QUESTION_COUNT
+  NEXT_PUBLIC_MIN_QUESTION_COUNT = var.NEXT_PUBLIC_MIN_QUESTION_COUNT
+  NEXT_PUBLIC_DISABLED_CRAWL     = var.NEXT_PUBLIC_DISABLED_CRAWL
+
+  # バックエンド環境変数
+  ENV                   = var.ENV
+  ALLOW_ORIGIN          = var.ALLOW_ORIGIN
+  GPT_MODEL             = var.GPT_MODEL
+  TEXT_EMBEDDINGS_MODEL = var.TEXT_EMBEDDINGS_MODEL
+  additional_env_vars   = var.additional_env_vars
+
   depends_on = [
     module.networking,
     module.storage,
