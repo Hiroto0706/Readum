@@ -1,115 +1,134 @@
 ###########################################################
 # フロントエンド
 ###########################################################
-# フロントエンド Cloud Run サービス
-resource "google_cloud_run_service" "frontend" {
+resource "google_cloud_run_v2_service" "readum_frontend" {
   name     = var.frontend_service_name
   location = var.region
 
   template {
-    spec {
-      containers {
-        image = "gcr.io/${var.project_id}/${var.frontend_service_name}:latest"
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/readum-repo/readum-frontend:latest"
 
-        resources {
-          limits = {
-            cpu    = "1000m"
-            memory = "512Mi"
-          }
-        }
-
-        # 環境変数
-        env {
-          name  = "NODE_ENV"
-          value = "production"
+      resources {
+        limits = {
+          cpu    = "1000m"
+          memory = "512Mi"
         }
       }
 
-      # サービスアカウント
-      service_account_name = var.service_account_email
-    }
-
-    metadata {
-      annotations = {
-        "autoscaling.knative.dev/minScale" = "1"
-        "autoscaling.knative.dev/maxScale" = "3"
-        # VPCアクセスコネクタを設定
-        "run.googleapis.com/vpc-access-connector" = var.vpc_connector_id
-        # すべてのトラフィックをVPCを通す
-        "run.googleapis.com/vpc-access-egress" = "all-traffic"
+      # 環境変数
+      env {
+        name  = "NODE_ENV"
+        value = "production"
+      }
+      env {
+        name  = "NEXT_PUBLIC_API_URL"
+        value = var.NEXT_PUBLIC_API_URL
+      }
+      env {
+        name  = "NEXT_PUBLIC_MAX_QUESTION_COUNT"
+        value = var.NEXT_PUBLIC_MAX_QUESTION_COUNT
+      }
+      env {
+        name  = "NEXT_PUBLIC_MIN_QUESTION_COUNT"
+        value = var.NEXT_PUBLIC_MIN_QUESTION_COUNT
+      }
+      env {
+        name  = "NEXT_PUBLIC_DISABLED_CRAWL"
+        value = var.NEXT_PUBLIC_DISABLED_CRAWL
       }
     }
-  }
 
-  # トラフィックルーティング
-  traffic {
-    percent         = 100
-    latest_revision = true
+    vpc_access {
+      connector = var.vpc_connector_id
+      egress    = "ALL_TRAFFIC"
+    }
+
+    # サービスアカウント
+    service_account = var.service_account_email
   }
 }
 
 # フロントエンドのIAMポリシー
-resource "google_cloud_run_service_iam_member" "frontend_access" {
-  service  = google_cloud_run_service.frontend.name
-  location = google_cloud_run_service.frontend.location
+resource "google_cloud_run_v2_service_iam_member" "frontend_access" {
+  name     = google_cloud_run_v2_service.readum_frontend.name
+  location = google_cloud_run_v2_service.readum_frontend.location
   role     = "roles/run.invoker"
-  member   = var.frontend_is_public ? "allUsers" : "serviceAccount:${var.service_account_email}"
+  member   = "allUsers"
 }
 
 ###########################################################
 # バックエンド
 ###########################################################
-# バックエンド Cloud Run サービス
-resource "google_cloud_run_service" "backend" {
+resource "google_cloud_run_v2_service" "readum_backend" {
   name     = var.backend_service_name
   location = var.region
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY" # VPC内部からのアクセスのみ許可
 
   template {
-    spec {
-      containers {
-        image = "gcr.io/${var.project_id}/${var.backend_service_name}:latest"
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/readum-repo/readum-backend:latest"
 
-        resources {
-          limits = {
-            cpu    = "1000m"
-            memory = "512Mi"
-          }
-        }
-
-        # 環境変数
-        env {
-          name  = "PYTHON_ENV"
-          value = "production"
+      resources {
+        limits = {
+          cpu    = "1000m"
+          memory = "512Mi"
         }
       }
 
-      # サービスアカウント
-      service_account_name = var.service_account_email
-    }
+      # 環境変数
+      env {
+        name  = "ENV"
+        value = var.ENV
+      }
+      env {
+        name  = "ALLOW_ORIGIN"
+        value = var.ALLOW_ORIGIN
+      }
+      env {
+        name  = "GPT_MODEL"
+        value = var.GPT_MODEL
+      }
+      env {
+        name  = "TEXT_EMBEDDINGS_MODEL"
+        value = var.TEXT_EMBEDDINGS_MODEL
+      }
+      dynamic "env" {
+        for_each = var.additional_env_vars
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
 
-    metadata {
-      annotations = {
-        "autoscaling.knative.dev/minScale" = "1"
-        "autoscaling.knative.dev/maxScale" = "3"
-        # VPCアクセスコネクタを設定
-        "run.googleapis.com/vpc-access-connector" = var.vpc_connector_id
-        # すべてのトラフィックをVPCを通す
-        "run.googleapis.com/vpc-access-egress" = "all-traffic"
+      env {
+        name  = "OPENAI_API_KEY"
+        value = local.OPENAI_API_KEY
+      }
+      env {
+        name  = "LANGCHAIN_API_KEY"
+        value = local.LANGCHAIN_API_KEY
+      }
+      env {
+        name  = "FIRECRAWL_API_KEY"
+        value = local.FIRECRAWL_API_KEY
       }
     }
-  }
 
-  # トラフィックルーティング
-  traffic {
-    percent         = 100
-    latest_revision = true
+    vpc_access {
+      connector = var.vpc_connector_id
+      egress    = "ALL_TRAFFIC"
+    }
+
+    # サービスアカウント
+    service_account = var.service_account_email
   }
 }
 
 # バックエンドのIAMポリシー - 内部アクセスのみ（サービスアカウントのみアクセス可能）
-resource "google_cloud_run_service_iam_member" "backend_access" {
-  service  = google_cloud_run_service.backend.name
-  location = google_cloud_run_service.backend.location
+resource "google_cloud_run_v2_service_iam_member" "backend_access" {
+  name     = google_cloud_run_v2_service.readum_backend.name
+  location = google_cloud_run_v2_service.readum_backend.location
   role     = "roles/run.invoker"
   member   = "serviceAccount:${var.service_account_email}"
 }

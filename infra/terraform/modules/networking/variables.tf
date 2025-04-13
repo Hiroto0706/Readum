@@ -13,16 +13,6 @@ variable "network_name" {
   type        = string
 }
 
-variable "subnet_name" {
-  description = "サブネット名"
-  type        = string
-}
-
-variable "subnet_ip_cidr_range" {
-  description = "サブネットのCIDR範囲"
-  type        = string
-}
-
 variable "connector_name" {
   description = "VPCアクセスコネクタ名"
   type        = string

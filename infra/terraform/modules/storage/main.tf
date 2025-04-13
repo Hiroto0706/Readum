@@ -24,3 +24,12 @@ resource "google_storage_bucket" "readum_bucket" {
     }
   }
 }
+
+# バケットへのアクセス権限
+resource "google_storage_bucket_iam_member" "storage_roles" {
+  for_each = toset(var.storage_roles)
+
+  bucket = google_storage_bucket.readum_bucket.name
+  role   = each.value
+  member = "serviceAccount:${var.service_account_email}"
+}
