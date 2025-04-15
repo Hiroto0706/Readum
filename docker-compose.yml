@@ -15,9 +15,10 @@ services:
       - ./backend/.env
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/credential.json
+      - PORT=8080
     networks:
       - readum-network
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 
   frontend:
     container_name: readum-frontend
@@ -30,6 +31,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - PORT=3000
     networks:
       - readum-network
     depends_on:

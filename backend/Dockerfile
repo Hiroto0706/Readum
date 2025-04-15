@@ -33,7 +33,7 @@ RUN mkdir -p /app/assets/tmp/faiss && \
 COPY . .
 
 # 最終用ステージ
-FROM gcr.io/distroless/python3-debian12:nonroot AS production
+FROM python:3.11-slim AS production
 
 WORKDIR /app
 
@@ -41,11 +41,16 @@ COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
-COPY --from=builder /app .
-COPY --from=builder --chown=nonroot:nonroot /app .
 
-EXPOSE 8000
+COPY --from=builder /app .
+
+# nonrootユーザーを作成
+RUN adduser --disabled-password --gecos "" nonroot
+RUN chown -R nonroot:nonroot /app
+
+ENV PORT=8080
+EXPOSE ${PORT}
 
 USER nonroot
 
-CMD ["/usr/local/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD /usr/local/bin/uvicorn main:app --host 0.0.0.0 --port ${PORT} --reload
