@@ -3,6 +3,7 @@ import { UserAnswer } from "@/features/result/types";
 import { BASE_URL } from "@/config";
 import { notFound } from "next/navigation";
 import React, { cache } from "react";
+import { headers } from "next/headers";
 
 const fetchResult = cache(async (uuid: string): Promise<UserAnswer> => {
   try {
@@ -31,4 +32,23 @@ export default async function Page({ params }: Props) {
   const result: UserAnswer = await fetchResult(uuid);
 
   return <Result result={result} />;
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { uuid } = await params;
+
+  const host = (await headers()).get("host");
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  const baseURL = `${protocol}://${host}`;
+
+  return {
+    metadataBase: new URL(baseURL),
+    openGraph: {
+      images: [`/result/${uuid}/opengraph-image`],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [`/result/${uuid}/opengraph-image`],
+    },
+  };
 }
