@@ -34,21 +34,12 @@ export default async function Page({ params }: Props) {
   return <Result result={result} />;
 }
 
-export async function generateMetadata({ params }: Props) {
-  const { uuid } = await params;
-
+export async function generateMetadata() {
   const host = (await headers()).get("host");
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
   const baseURL = `${protocol}://${host}`;
 
   return {
     metadataBase: new URL(baseURL),
-    openGraph: {
-      images: [`/result/${uuid}/opengraph-image`],
-    },
-    twitter: {
-      card: "summary_large_image",
-      images: [`/result/${uuid}/opengraph-image`],
-    },
   };
 }
