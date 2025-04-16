@@ -1,6 +1,6 @@
 import inspect
 from typing import List
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from src.domain.entities.question import QuizOption
 from src.domain.entities.quiz import Quiz
@@ -15,15 +15,25 @@ class UserAnswer(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
+    @field_validator("id")
+    @classmethod
+    def validate_id(cls, v: str):
+        """IDがから出ないことを確認する"""
+        if not v:
+            raise ValueError("IDは空であってはなりません")
+        return v
+
     @field_validator("selected_options")
-    def validate_selected_options(cls, v, values):
+    @classmethod
+    def validate_selected_options(cls, v: str, info: ValidationInfo):
         """
         回答の数がクイズの数と一致する
         各回答がA,B,C,Dのいずれかであることを保証する
         """
-        if "preview" in values and len(v) != len(values["preview"].questions):
+        preview = info.data.get("preview")
+        if preview and len(v) != len(preview.questions):
             raise ValueError(
-                f"選択された回答の数({len(v)})がクイズの問題数({len(values['preview'].questions)})と一致しません"
+                f"選択された回答の数({len(v)})がクイズの問題数({len(preview.questions)})と一致しません"
             )
 
         valid_options = set(inspect.signature(QuizOption).parameters.keys())

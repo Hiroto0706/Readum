@@ -1,6 +1,5 @@
 from enum import Enum
-from urllib.parse import urlparse
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QuizType(Enum):

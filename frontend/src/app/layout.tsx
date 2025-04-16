@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -10,10 +11,13 @@ export async function generateMetadata() {
 
   return {
     metadataBase: new URL(baseURL),
-    title: "Readum",
-    description: "Readumはあなたの読書を可視化するAIテストアプリケーションです",
   };
 }
+
+export const metadata: Metadata = {
+  title: "Readum",
+  description: "Readumはあなたの読書を可視化するAIテストアプリケーションです",
+};
 
 export default function RootLayout({
   children,
