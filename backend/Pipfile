@@ -16,6 +16,7 @@ firecrawl-py = "*"
 langsmith = "*"
 google-cloud-storage = "*"
 pytest-mock = "*"
+pytest-cov = "*"
 
 [dev-packages]
 
