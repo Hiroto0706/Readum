@@ -17,6 +17,7 @@ class TestGCSClient:
         # パッチ適用
         # 指定したパスを一時的にモックに置き換える
         # コード内で指定したパスが呼ばれるとreturn_valueを返す
+        # 直接アクセスできない関数や属性はmocker.patch()を用いるという理解でOK
         mocker.patch("google.cloud.storage.Client", return_value=mock_client)
         return mock_client
 
