@@ -11,7 +11,12 @@ class TestGCSClient:
     @pytest.fixture
     def mock_storage_client(self, mocker):
         """Google Cloud Storage クライアントのモックを作成するフィクスチャ"""
+        # スペック準拠モデルの作成
+        # スペック準拠モデルは元クラスに存在しないメソッドを呼び出そうとするとエラーを返す
         mock_client = mocker.MagicMock(spec=storage.Client)
+        # パッチ適用
+        # 指定したパスを一時的にモックに置き換える
+        # コード内で指定したパスが呼ばれるとreturn_valueを返す
         mocker.patch("google.cloud.storage.Client", return_value=mock_client)
         return mock_client
 
@@ -51,18 +56,19 @@ class TestGCSClient:
             "difficultyValue": "intermediate",
         }
 
+    # fixtureで定義したモックを受け取ることができる
     def test_init_existing_bucket(self, mock_storage_client, mock_bucket):
         """既存のバケットでGCSClientを初期化できることをテスト"""
-        # Arrange
+        # get_bucketが呼ばれた時、mock_bucketを返すように設定する
         mock_storage_client.get_bucket.return_value = mock_bucket
 
-        # Act
         gcs_client = GCSClient()
 
-        # Assert
+        # get_bucket メソッドが、設定ファイルに定義されたバケット名で正確に1回だけ呼ばれたことをアサートする
         mock_storage_client.get_bucket.assert_called_once_with(
             settings.third_party.BUCKET_NAME
         )
+        # 逆にこれは一度も呼ばれていないことをアサートする
         mock_storage_client.create_bucket.assert_not_called()
         assert gcs_client.bucket == mock_bucket
         assert gcs_client.bucket_name == settings.third_party.BUCKET_NAME
@@ -70,11 +76,11 @@ class TestGCSClient:
 
     def test_init_create_bucket(self, mock_storage_client, mock_bucket):
         """バケットが存在しない場合、新しいバケットを作成することをテスト"""
-        # Arrange
+        # モックメソッドが呼ばれた時の副作用を設定する。これは実際のクラスと同じ挙動を再現するための設定
         mock_storage_client.get_bucket.side_effect = Exception("Bucket not found")
+        # create_bucketが呼ばれた時、mock_bucketを返すように設定
         mock_storage_client.create_bucket.return_value = mock_bucket
 
-        # Act
         gcs_client = GCSClient()
 
         # Assert
@@ -97,14 +103,17 @@ class TestGCSClient:
         gcs_client = GCSClient()
         quiz_id = "test-quiz-id"
 
-        # Act
+        # ここでsave_quiz()を実行しているが、内部ではモックが実行されるだけ
+        # レスポンスは実際のコードのものが返ってくる
+        # 実際のコードではblob_nameを返しているのでresultはblob_nameとなるのだ
         result = gcs_client.save_quiz(quiz_id, sample_user_answer)
 
-        # Assert
         expected_blob_name = f"{gcs_client.prefix}{quiz_id}.json"
+        # 以下のアサートではpatchを用いて振る舞いをコピーしているので、呼ばれた回数がわかる
         mock_bucket.blob.assert_called_once_with(expected_blob_name)
         mock_blob.upload_from_string.assert_called_once()
-        # JSONデータが正しく変換されていることを確認
+        # call_args[0][0]で実コードのblob.upload_from_string()の第１引数を参照している
+        # ちなみに第２引数を参照したい場合はcall_string[0][1]とすればよい
         upload_data = mock_blob.upload_from_string.call_args[0][0]
         assert json.loads(upload_data) == sample_user_answer
         assert result == expected_blob_name
