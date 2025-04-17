@@ -15,6 +15,7 @@ faiss-cpu = "*"
 firecrawl-py = "*"
 langsmith = "*"
 google-cloud-storage = "*"
+pytest-mock = "*"
 
 [dev-packages]
 
