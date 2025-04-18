@@ -8,3 +8,4 @@ credential.json
 
 # Test
 .coverage
+/htmlcov

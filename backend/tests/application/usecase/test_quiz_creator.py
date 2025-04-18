@@ -21,7 +21,7 @@ from src.infrastructure.exceptions.vectordb_exceptions import (
 # テスト用の環境変数設定
 os.environ["ENV"] = "test"
 os.environ["LANGCHAIN_PROJECT"] = "readum-test"
-os.environ["GPT_MODEL"] = "gpt-4.1-nano"
+os.environ["GPT_MODEL"] = "gpt-4o-mini"
 
 
 # テスト用のドキュメントパス
@@ -35,43 +35,45 @@ class TestQuizCreator:
         """QuizCreatorのインスタンスを作成するフィクスチャ"""
         return QuizCreator()
 
-    def test_create_quiz_with_different_parameters(self, quiz_creator):
+    @pytest.mark.parametrize(
+        "question_count, difficulty",
+        [
+            (3, Difficulty.BEGINNER),
+            (5, Difficulty.INTERMEDIATE),
+            (7, Difficulty.ADVANCED),
+        ],
+    )
+    def test_create_quiz_with_different_parameters(
+        self, quiz_creator, question_count, difficulty
+    ):
         """異なるパラメータでのクイズ作成をテスト"""
         # テスト用のドキュメントを読み込み
         with open(DOCUMENT_PATH, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # 様々なパラメータの組み合わせをテスト
-        parameters = [
-            (3, Difficulty.BEGINNER),
-            (5, Difficulty.INTERMEDIATE),
-            (7, Difficulty.ADVANCED),
-        ]
+        # クイズを作成
+        response = quiz_creator.create_quiz(
+            quiz_type=QuizType.TEXT,
+            content=content,
+            question_count=question_count,
+            difficulty=difficulty,
+        )
 
-        for question_count, difficulty in parameters:
-            # クイズを生成
-            response = quiz_creator.create_quiz(
-                quiz_type=QuizType.TEXT,
-                content=content,
-                question_count=question_count,
-                difficulty=difficulty,
-            )
+        # 返り値の検証
+        self._validate_quiz_response(response, question_count, difficulty)
 
-            # 返り値の検証
-            self._validate_quiz_response(response, question_count, difficulty)
+        # ベクトルストアディレクトリの削除を確認
+        # 固有のIDを使ってディレクトリを検索する代わりに、一時ディレクトリが空かどうかチェック
+        from config.settings import settings
 
-            # ベクトルストアディレクトリの削除を確認
-            # 固有のIDを使ってディレクトリを検索する代わりに、一時ディレクトリが空かどうかチェック
-            from config.settings import settings
+        tmp_path = settings.embeddings.TMP_VECTORDB_PATH
 
-            tmp_path = settings.embeddings.TMP_VECTORDB_PATH
-
-            # IDごとのディレクトリが削除されているはずなので、
-            # そのIDに対応するディレクトリは存在しないはず
-            vector_dir = os.path.join(tmp_path, response.id)
-            assert not os.path.exists(
-                vector_dir
-            ), f"ディレクトリが削除されていません: {vector_dir}"
+        # IDごとのディレクトリが削除されているはずなので、
+        # そのIDに対応するディレクトリは存在しないはず
+        vector_dir = os.path.join(tmp_path, response.id)
+        assert not os.path.exists(
+            vector_dir
+        ), f"ディレクトリが削除されていません: {vector_dir}"
 
     def test_process_rag_success(self, quiz_creator):
         """_process_ragメソッドの正常系テスト"""

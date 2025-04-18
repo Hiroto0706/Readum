@@ -13,3 +13,12 @@ build:
 .PHONY: server-as-prd
 server-as-prd:
 	docker compose -f docker-compose.prd.yml up --build
+
+# 例）make test tag=all, make test
+.PHONY: test
+test:
+	@cd backend && if [ "$(tag)" = "all" ]; then \
+		pipenv run pytest --cov --cov-branch .; \
+	else \
+		pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" .; \
+	fi
