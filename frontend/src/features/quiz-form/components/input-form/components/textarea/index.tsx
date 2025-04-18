@@ -13,7 +13,7 @@ interface Props {
 }
 
 const DISABLED_CRAWL =
-  process.env.DISABLED_CRAWL === "true" ? true : false;
+  process.env.DISABLED_CRAWL !== "false" ? false : true;
 
 export const TextArea: React.FC<Props> = ({
   setQuizType,
