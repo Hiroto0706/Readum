@@ -24,8 +24,8 @@ jobs:
         run: pip install pipenv
 
       - name: Install dependencies
+        working-directory: backend
         run: |
-          cd backend
           pipenv install --dev
 
       - name: Run tests (and collect summary)
@@ -33,9 +33,9 @@ jobs:
         working-directory: backend
         shell: bash
         run: |
-          set -o pipefail
-          TEST_OUTPUT=$(pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" -v | tee /dev/tty)
+          TEST_OUTPUT=$(pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" -v 2>&1)
           EXIT_CODE=$?
+          echo "$TEST_OUTPUT"
           {
             echo 'TEST_SUMMARY<<EOF'
             echo '## Backend Test Results'
