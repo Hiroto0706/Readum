@@ -5,3 +5,7 @@
 assets/document.txt
 assets/tmp/*
 credential.json
+
+# Test
+.coverage
+/htmlcov
