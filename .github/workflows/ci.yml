@@ -1,0 +1,91 @@
+name: CI Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["**"]
+
+jobs:
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+          cache-dependency-path: backend/Pipfile.lock
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pipenv install --dev
+
+      - name: Run tests (and collect summary)
+        id: run-tests
+        working-directory: backend
+        shell: bash
+        run: |
+          set -o pipefail
+          TEST_OUTPUT=$(pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" -v | tee /dev/tty)
+          EXIT_CODE=$?
+          {
+            echo 'TEST_SUMMARY<<EOF'
+            echo '## Backend Test Results'
+            echo '```'
+            echo "$TEST_OUTPUT" | grep -E '(collected|FAILED|PASSED)'
+            echo '```'
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+          exit $EXIT_CODE
+
+      - name: Comment PR with Test Results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const testSummary = process.env.TEST_SUMMARY;
+            if (testSummary) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: testSummary
+              });
+            }
+
+  frontend-lint-build:
+    name: Frontend Lint and Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Lint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
