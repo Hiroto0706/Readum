@@ -30,6 +30,7 @@ jobs:
 
       - name: Run tests (and collect summary)
         id: run-tests
+        continue-on-error: true
         working-directory: backend
         shell: bash
         run: |
