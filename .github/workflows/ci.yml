@@ -36,17 +36,27 @@ jobs:
           BUCKET_NAME: readum-storage
         run: |
           set +e
-          TEST_OUTPUT=$(pipenv run pytest --cov -k "not test_quiz_creator.py" 2>&1)
+          TEST_OUTPUT=$(pipenv run pytest --cov -k "not test_quiz_creator.py" -v 2>&1)
           EXIT_CODE=$?
           set -e
 
-          echo "$TEST_OUTPUT"
+          echo "$TEST_OUTPUT" 
+
+          COVERAGE=$(printf '%s\n' "$TEST_OUTPUT" | awk '
+            /^_{5,} coverage:/ { cov=1 }
+            cov { print }
+            /^TOTAL/ { cov=0 }
+          ')
+
+          SUMMARY_LINE=$(printf '%s\n' "$TEST_OUTPUT" | \
+                        grep -E '^=+ .* (passed|failed)' | tail -1)
 
           {
             echo 'TEST_SUMMARY<<EOF'
-            echo '## Backend Test Results'
+            echo '## Backend Test Coverage'
             echo '```'
-            echo "$TEST_OUTPUT"
+            echo "$COVERAGE"
+            echo "$SUMMARY_LINE"
             echo '```'
             echo 'EOF'
           } >> "$GITHUB_ENV"
