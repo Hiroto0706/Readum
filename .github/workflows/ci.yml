@@ -36,7 +36,7 @@ jobs:
           BUCKET_NAME: readum-storage
         run: |
           set +e
-          TEST_OUTPUT=$(pipenv run pytest --cov -k "not test_quiz_creator.py" -v 2>&1)
+          TEST_OUTPUT=$(pipenv run pytest --cov -k "not test_quiz_creator.py" 2>&1)
           EXIT_CODE=$?
           set -e
 
