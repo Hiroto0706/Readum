@@ -28,23 +28,34 @@ jobs:
         run: |
           pipenv install --dev
 
-      - name: Run tests (and collect summary)
+      - name: Run tests & collect summary
         id: run-tests
-        continue-on-error: true
         working-directory: backend
         shell: bash
         run: |
+          set +e
           TEST_OUTPUT=$(pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" -v 2>&1)
           EXIT_CODE=$?
+          set -e
+
           echo "$TEST_OUTPUT"
+
+          SUMMARY=$(echo "$TEST_OUTPUT" | grep -E '(collected|====|FAILED|PASSED)')
+
           {
             echo 'TEST_SUMMARY<<EOF'
             echo '## Backend Test Results'
             echo '```'
-            echo "$TEST_OUTPUT" | grep -E '(collected|FAILED|PASSED)'
+            echo "$SUMMARY"
             echo '```'
             echo 'EOF'
           } >> "$GITHUB_ENV"
+
+          echo '## Backend Test Results' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
           exit $EXIT_CODE
 
       - name: Comment PR with Test Results
