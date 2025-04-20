@@ -42,13 +42,11 @@ jobs:
 
           echo "$TEST_OUTPUT"
 
-          SUMMARY=$(echo "$TEST_OUTPUT" | grep -E '(collected|====|FAILED|PASSED)')
-
           {
             echo 'TEST_SUMMARY<<EOF'
             echo '## Backend Test Results'
             echo '```'
-            echo "$SUMMARY"
+            echo "$TEST_OUTPUT"
             echo '```'
             echo 'EOF'
           } >> "$GITHUB_ENV"
