@@ -18,7 +18,7 @@ server-as-prd:
 .PHONY: test
 test:
 	@cd backend && if [ "$(tag)" = "all" ]; then \
-		pipenv run pytest --cov --cov-branch .; \
+		pipenv run pytest .; \
 	else \
-		pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" .; \
+		pipenv run pytest -k "not test_quiz_creator.py" .; \
 	fi

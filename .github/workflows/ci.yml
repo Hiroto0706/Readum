@@ -32,9 +32,11 @@ jobs:
         id: run-tests
         working-directory: backend
         shell: bash
+        env:
+          BUCKET_NAME: readum-storage
         run: |
           set +e
-          TEST_OUTPUT=$(pipenv run pytest --cov --cov-branch -k "not test_quiz_creator.py" -v 2>&1)
+          TEST_OUTPUT=$(pipenv run pytest --cov -k "not test_quiz_creator.py" -v 2>&1)
           EXIT_CODE=$?
           set -e
 
@@ -50,11 +52,6 @@ jobs:
             echo '```'
             echo 'EOF'
           } >> "$GITHUB_ENV"
-
-          echo '## Backend Test Results' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
           exit $EXIT_CODE
 
