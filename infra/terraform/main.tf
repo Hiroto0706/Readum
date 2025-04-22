@@ -4,6 +4,26 @@ data "google_service_account" "service_account" {
   project    = var.project_id
 }
 
+# デプロイ用サービスアカウント
+resource "google_service_account" "deploy_service_account" {
+  account_id   = var.service_account_id_for_deploy
+  display_name = "Readum Service Account for Deployment"
+  project      = var.project_id
+  description  = "Service account for GitHub Actions deployments"
+}
+
+resource "google_project_iam_member" "deploy_service_account_iam" {
+  project = var.project_id
+
+  for_each = toset([
+    "roles/artifactregistry.writer",
+    "roles/run.admin",
+    "roles/iam.serviceAccountUser"
+  ])
+  role   = each.value
+  member = "serviceAccount:${google_service_account.deploy_service_account.email}"
+}
+
 # ネットワークモジュール
 module "networking" {
   source = "./modules/networking"

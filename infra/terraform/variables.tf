@@ -18,6 +18,10 @@ variable "service_account_id" {
   description = "サービスアカウントID（@より前の部分）"
   type        = string
 }
+variable "service_account_id_for_deploy" {
+  description = "デプロイ用のサービスアカウントID（@より前の部分）"
+  type        = string
+}
 
 variable "service_account_display_name" {
   description = "サービスアカウントの表示名"
