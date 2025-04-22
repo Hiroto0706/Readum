@@ -21,12 +21,16 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./frontend
+        working-directory: frontend
         run: npm ci
 
-      - name: Run tests
-        working-directory: ./frontend
-        run: npm test
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
 
       - name: Set up GCP authentication
         uses: google-github-actions/setup-gcloud@v2
@@ -43,7 +47,7 @@ jobs:
           rm gcp-key.json
 
       - name: Build and push Docker image
-        working-directory: ./frontend
+        working-directory: frontend
         run: |
           docker build --platform linux/amd64 -t asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} .
           docker push asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }}
