@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# TODO: ここの設定詳しく見る必要あり
 app.add_middleware(
     CORSMiddleware,
     # allow_origins=[settings.app.ALLOW_ORIGIN],
