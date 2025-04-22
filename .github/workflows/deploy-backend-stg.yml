@@ -41,11 +41,11 @@ jobs:
 
       - name: Deploy to Cloud Run
         env:
-          tag_name : stg
+          tag_name: stg
         run: |
           gcloud run services update readum-backend \
             --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-backend:${{ github.sha }} \
             --region ${{ vars.GCP_REGION }} \
             --tag ${{ env.tag_name }} \
-            --update-env-vars ALLOW_ORIGIN=https://${{ env.tag_name }}---${{ vars.ALLOW_ORIGIN }} \
+            --update-env-vars ALLOW_ORIGIN=https://${{ env.tag_name }}---${{ vars.ALLOW_ORIGIN }},LANGCHAIN_PROJECT=readum-stg \
             --no-traffic
