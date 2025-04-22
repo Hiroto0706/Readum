@@ -43,18 +43,18 @@ jobs:
           echo '${{ secrets.GCP_SA_DEPLOY_KEY }}' > gcp-key.json
           gcloud auth activate-service-account --key-file=gcp-key.json
           gcloud config set project ${{ vars.GCP_PROJECT_ID }}
-          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
           rm gcp-key.json
 
       - name: Build and push Docker image
         working-directory: frontend
         run: |
-          docker build --platform linux/amd64 -t asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} .
-          docker push asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }}
+          docker build --platform linux/amd64 -t ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} .
+          docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run services update readum-frontend \
-            --image asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} \
-            --region asia-northeast1 \
+            --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} \
+            --region ${{ vars.GCP_REGION }} \
             --platform managed

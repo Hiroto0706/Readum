@@ -39,7 +39,7 @@ jobs:
           EXIT_CODE=$?
           set -e
 
-          echo "$TEST_OUTPUT" 
+          echo "$TEST_OUTPUT"
 
           COVERAGE=$(printf '%s\n' "$TEST_OUTPUT" | awk '
             /^_{5,} coverage:/ { cov=1 }
