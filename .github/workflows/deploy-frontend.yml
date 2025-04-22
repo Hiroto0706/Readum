@@ -5,9 +5,10 @@ on:
     branches: [main]
     paths:
       - "frontend/**"
+  workflow_dispatch:
 
 jobs:
-  test-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
