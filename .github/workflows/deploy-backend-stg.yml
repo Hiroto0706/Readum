@@ -1,14 +1,14 @@
-name: Deploy Backend to Cloud Run
+name: Deploy Backend to Cloud Run (STG)
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
     paths:
       - "backend/**"
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-stg:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +42,12 @@ jobs:
           docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-backend:latest
 
       - name: Deploy to Cloud Run
+        env:
+          tag_name: stg
         run: |
           gcloud run services update readum-backend \
             --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-backend:${{ github.sha }} \
-            --region ${{ vars.GCP_REGION }}
+            --region ${{ vars.GCP_REGION }} \
+            --tag ${{ env.tag_name }} \
+            --update-env-vars ALLOW_ORIGIN=https://${{ env.tag_name }}---${{ vars.ALLOW_ORIGIN }} \
+            --no-traffic
