@@ -1,0 +1,108 @@
+name: CI Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["**"]
+
+jobs:
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+          cache-dependency-path: backend/Pipfile.lock
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pipenv install --dev
+
+      - name: Run tests & collect summary
+        id: run-tests
+        working-directory: backend
+        shell: bash
+        env:
+          BUCKET_NAME: readum-storage
+        run: |
+          set +e
+          TEST_OUTPUT=$(pipenv run pytest --cov -k "not test_quiz_creator.py" -v 2>&1)
+          EXIT_CODE=$?
+          set -e
+
+          echo "$TEST_OUTPUT" 
+
+          COVERAGE=$(printf '%s\n' "$TEST_OUTPUT" | awk '
+            /^_{5,} coverage:/ { cov=1 }
+            cov { print }
+            /^TOTAL/ { cov=0 }
+          ')
+
+          SUMMARY_LINE=$(printf '%s\n' "$TEST_OUTPUT" | \
+                        grep -E '^=+ .* (passed|failed)' | tail -1)
+
+          {
+            echo 'TEST_SUMMARY<<EOF'
+            echo '## Backend Test Coverage'
+            echo '```'
+            echo "$COVERAGE"
+            echo "$SUMMARY_LINE"
+            echo '```'
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+
+          exit $EXIT_CODE
+
+      - name: Comment PR with Test Results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const testSummary = process.env.TEST_SUMMARY;
+            if (testSummary) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: testSummary
+              });
+            }
+
+  frontend-lint-build:
+    name: Frontend Lint and Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Lint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
