@@ -55,7 +55,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         env:
-          tag_name: stg
+          tag_name : stg
         run: |
           gcloud run services update readum-frontend \
             --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} \
