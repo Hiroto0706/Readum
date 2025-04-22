@@ -1,14 +1,14 @@
-name: Deploy Frontend to Cloud Run
+name: Deploy Frontend to Cloud Run (STG)
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
     paths:
       - "frontend/**"
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-stg:
     runs-on: ubuntu-latest
 
     steps:
@@ -56,7 +56,12 @@ jobs:
           docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:latest
 
       - name: Deploy to Cloud Run
+        env:
+          tag_name: stg
         run: |
           gcloud run services update readum-frontend \
             --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} \
-            --region ${{ vars.GCP_REGION }}
+            --region ${{ vars.GCP_REGION }} \
+            --tag ${{ env.tag_name }} \
+            --update-env-vars API_ENDPOINT=https://${{ env.tag_name }}---${{ vars.API_ENDPOINT }} \
+            --no-traffic
