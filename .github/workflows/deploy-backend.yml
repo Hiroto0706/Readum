@@ -1,0 +1,59 @@
+name: Deploy Backend to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+          cache-dependency-path: backend/Pipfile.lock
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: pipenv install --dev
+
+      - name: Run tests
+        working-directory: ./backend
+        run: pipenv run pytest
+
+      - name: Set up GCP authentication
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      # JSON KEYを使用した認証
+      - name: Authenticate to Google Cloud
+        run: |
+          echo '${{ secrets.GCP_SA_DEPLOY_KEY }}' > gcp-key.json
+          gcloud auth activate-service-account --key-file=gcp-key.json
+          gcloud config set project ${{ vars.GCP_PROJECT_ID }}
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+          rm gcp-key.json
+
+      - name: Build and push Docker image
+        working-directory: ./backend
+        run: |
+          docker build --platform linux/amd64 -t asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-backend:${{ github.sha }} .
+          docker push asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-backend:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run services update readum-backend \
+            --image asia-northeast1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-backend:${{ github.sha }} \
+            --region asia-northeast1 \
+            --platform managed
