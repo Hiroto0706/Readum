@@ -14,13 +14,19 @@ resource "google_cloud_run_v2_service" "readum_frontend" {
   }
 
   template {
+    scaling {
+      max_instance_count = 2
+      min_instance_count = 0
+    }
+
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/readum-repo/readum-frontend:latest"
 
       resources {
+        cpu_idle = true
         limits = {
           cpu    = "1000m"
-          memory = "512Mi"
+          memory = "256Mi"
         }
       }
 
@@ -82,13 +88,19 @@ resource "google_cloud_run_v2_service" "readum_backend" {
   }
 
   template {
+    scaling {
+      max_instance_count = 2
+      min_instance_count = 0
+    }
+
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/readum-repo/readum-backend:latest"
 
       resources {
+        cpu_idle = true
         limits = {
           cpu    = "1000m"
-          memory = "512Mi"
+          memory = "256Mi"
         }
       }
 

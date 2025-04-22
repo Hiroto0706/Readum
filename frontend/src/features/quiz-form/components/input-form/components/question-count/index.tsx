@@ -2,6 +2,13 @@
 
 import React from "react";
 
+const MIN_QUESTION_COUNT = parseInt(
+  process.env.NEXT_PUBLIC_MIN_QUESTION_COUNT || "3"
+);
+const MAX_QUESTION_COUNT = parseInt(
+  process.env.NEXT_PUBLIC_MAX_QUESTION_COUNT || "10"
+);
+
 interface Props {
   questionCount: number | null;
   setQuestionCount: (value: React.SetStateAction<number | null>) => void;
@@ -21,8 +28,8 @@ export const QuestionCount: React.FC<Props> = ({
       </label>
       <input
         type="number"
-        min={process.env.NEXT_PUBLIC_MIN_QUESTION_COUNT}
-        max={process.env.NEXT_PUBLIC_MAX_QUESTION_COUNT}
+        min={MIN_QUESTION_COUNT}
+        max={MAX_QUESTION_COUNT}
         value={questionCount ? questionCount : ""}
         onChange={(e) => setQuestionCount(parseInt(e.target.value))}
         className={`w-full p-2 border border-emerald-300 rounded ${
@@ -70,9 +77,7 @@ export const QuestionCount: React.FC<Props> = ({
         </button>
       </div>
       <p className="text-sm text-gray-500 mt-1">
-        {process.env.NEXT_PUBLIC_MIN_QUESTION_COUNT}〜
-        {process.env.NEXT_PUBLIC_MAX_QUESTION_COUNT}
-        問の間で設定してください
+        {MIN_QUESTION_COUNT}〜{MAX_QUESTION_COUNT}問の間で設定してください
       </p>
     </div>
   );
