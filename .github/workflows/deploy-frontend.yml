@@ -50,8 +50,10 @@ jobs:
       - name: Build and push Docker image
         working-directory: frontend
         run: |
-          docker build --platform linux/amd64 -t ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} .
+          docker build --platform linux/amd64 -t ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} -t ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:latest .
+
           docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }}
+          docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:latest
 
       - name: Deploy to Cloud Run
         run: |
