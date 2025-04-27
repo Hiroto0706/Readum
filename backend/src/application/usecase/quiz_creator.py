@@ -13,6 +13,7 @@ from src.application.interface.database_file_handler import DBFileHandler
 from src.api.models.quiz import Difficulty, QuizResponse, QuizType
 from src.application.exceptions.quiz_creation_exceptions import (
     DocumentProcessingError,
+    InsufficientContextError,
     InvalidInputError,
     RAGProcessingError,
     VectorStoreOperationError,
@@ -74,6 +75,11 @@ class QuizCreator(BaseModel):
         # FIXME: API層でバリデーションは行ってもいいかも
         if not content:
             error_msg = "Content cannot be empty"
+            logger.error(error_msg)
+            raise InvalidInputError(error_msg)
+
+        if quiz_type == QuizType.TEXT and len(content) < 100:
+            error_msg = "TEXT type content must be at least 100 characters long."
             logger.error(error_msg)
             raise InvalidInputError(error_msg)
 
@@ -189,15 +195,16 @@ class QuizCreator(BaseModel):
         """RAG処理を行うヘルパーメソッド"""
         prompt = get_prompt_from_hub()
         llm = ChatOpenAI(model_name=settings.model.GPT_MODEL)
-        rag_agent = RAGAgentModelImpl(llm=llm, prompt=prompt, rag_chain=None)
-
         retriever = vector_store_handler.as_retriever(directory_path)
-        rag_agent = rag_agent.set_rag_chain(retriever)
+        rag_agent = RAGAgentModelImpl(llm=llm, prompt=prompt, retriever=retriever)
 
-        rag_response = rag_agent.invoke_chain(
+        rag_response = rag_agent.graph_run(
             question_count=question_count,
             difficulty=difficulty.value,
         )
+
+        if rag_response is None:
+            raise InsufficientContextError
 
         return QuizResponse(
             id=uuid, preview=rag_response, difficulty_value=difficulty.value

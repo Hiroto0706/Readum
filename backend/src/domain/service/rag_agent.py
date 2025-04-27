@@ -14,10 +14,16 @@ class RAGAgentModel(BaseModel, ABC):
     prompt: Any = Field(..., description="プロンプトテンプレート")
     rag_chain: Any = Field(default=None, description="RAG Chain", init=False)
 
+    rag_agent: Any = Field(default=None, description="RAG Agent", init=False)
+    evaluate_agent: Any = Field(
+        default=None, description="Evaluation Agent", init=False
+    )
+    graph: Any = Field(default=None, description="LangGraph", init=False)
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @abstractmethod
-    def set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":
+    def _set_rag_chain(self, retriever: VectorStoreRetriever) -> "RAGAgentModel":
         """RAGを実行するためのChainを生成する"""
         pass
 

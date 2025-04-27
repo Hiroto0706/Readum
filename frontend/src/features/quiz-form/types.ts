@@ -16,6 +16,11 @@ export interface Quiz {
   questions: Question[];
 }
 
+export interface ErrorResponse {
+  status: number;
+  message: string;
+}
+
 export interface QuizResponse {
   id: string;
   preview: Quiz;

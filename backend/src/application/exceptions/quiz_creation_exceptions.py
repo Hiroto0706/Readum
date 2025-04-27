@@ -28,3 +28,9 @@ class InvalidInputError(QuizCreationBaseException):
     """無効な入力パラメータのエラー"""
 
     pass
+
+
+class InsufficientContextError(QuizCreationBaseException):
+    """コンテキスト不足時に投げる例外"""
+
+    pass
