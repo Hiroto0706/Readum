@@ -204,6 +204,7 @@ class QuizCreator(BaseModel):
         )
 
         if rag_response is None:
+            logger.warning("Graph run returned None")
             raise InsufficientContextError("Insufficient context to generate a quiz")
 
         return QuizResponse(

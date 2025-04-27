@@ -227,9 +227,10 @@ class RAGAgentModelImpl(RAGAgentModel):
                 agents=[self.rag_agent, self.evaluate_agent],
                 model=self.llm,
                 prompt=(
-                    "You are RAGQuizAgent. "
-                    "Generate a quiz based on the stored context using "
-                    "generate_quiz_tool(question_count, difficulty, instruction). "
+                    "You are RAGQuizAgent. Follow these steps: "
+                    "1. First, generate a quiz based on the stored context using generate_quiz_tool(question_count, difficulty, instruction). "
+                    "2. Then, evaluate the generated quiz using evaluate_agent to check if the questions are appropriate, accurate, and well-formed. "
+                    "3. If the evaluation suggests improvements, have the rag_quiz_agent generate a revised quiz. "
                     "IF CONTEXT IS INSUFFICIENT OR GENERATE_QUIZ_TOOL RETURNS NONE, YOU MUST RETURN ONLY THE STRING 'None' WITHOUT ANY ADDITIONAL TEXT OR FORMATTING. "
                     "You MUST use output_schema() tool to understand the required format. "
                     "YOUR FINAL OUTPUT MUST BE VALID JSON ONLY. "
@@ -258,7 +259,7 @@ class RAGAgentModelImpl(RAGAgentModel):
         self,
         question_count: int,
         difficulty: str,
-    ) -> Quiz:
+    ) -> Quiz | None:
         """LangGraphを用いてクイズを生成する"""
         try:
             result = self.graph.invoke(
@@ -277,31 +278,63 @@ class RAGAgentModelImpl(RAGAgentModel):
                 print(item.content)
                 print("================")
 
-            # Supervisorからの出力を直接取得
-            for message in result["messages"]:
+            # デバッグ用にメッセージ構造をログ出力
+            logger.debug("LangGraph messages structure:")
+            for item in result["messages"]:
+                if hasattr(item, "name"):
+                    logger.debug(f"Message from {item.name}")
+
+            # supervisorからの最終出力を処理
+            for message in reversed(result["messages"]):
                 if hasattr(message, "name") and message.name == "supervisor":
-                    if isinstance(message.content, str):
-                        try:
-                            quiz_data = json.loads(message.content)
-                        except json.JSONDecodeError:
-                            json_match = re.search(r"({[\s\S]*})", message.content)
-                            if json_match:
-                                try:
-                                    quiz_data = json.loads(json_match.group(1))
-                                except:
-                                    continue
-                            else:
-                                continue
-                    else:
-                        quiz_data = message.content
-
-                    # "questions"プロパティが存在する場合は直接Quizオブジェクトを作成
-                    if "questions" in quiz_data and isinstance(
-                        quiz_data["questions"], list
+                    content = message.content
+                    if (
+                        content
+                        and isinstance(content, str)
+                        and content.strip() not in ["None", ""]
                     ):
-                        # 構造がすでに期待通りなのでそのままQuizオブジェクトを作成
-                        return Quiz(questions=quiz_data["questions"])
+                        try:
+                            # JSONデータとして解析
+                            data = json.loads(content)
+                            if "questions" in data and isinstance(
+                                data["questions"], list
+                            ):
+                                # 有効なクイズデータが見つかった
+                                logger.info("Valid quiz data found from supervisor")
+                                return Quiz(questions=data["questions"])
+                        except json.JSONDecodeError:
+                            logger.warning(
+                                f"Failed to parse supervisor content as JSON: {content[:100]}..."
+                            )
 
+            # rag_quiz_agentの出力をチェック
+            for message in result["messages"]:
+                if hasattr(message, "name") and message.name == "rag_quiz_agent":
+                    content = message.content
+                    if (
+                        content
+                        and isinstance(content, str)
+                        and content.strip() not in ["None", ""]
+                    ):
+                        try:
+                            # JSONデータとして解析
+                            if content.strip().startswith("{"):
+                                data = json.loads(content)
+                                if "questions" in data and isinstance(
+                                    data["questions"], list
+                                ):
+                                    # RAGエージェントから有効なクイズデータが見つかった
+                                    logger.info(
+                                        "Valid quiz data found from rag_quiz_agent"
+                                    )
+                                    return Quiz(questions=data["questions"])
+                        except json.JSONDecodeError:
+                            logger.warning(
+                                f"Failed to parse RAG agent content as JSON: {content[:100]}..."
+                            )
+
+            # 有効なクイズデータが見つからなかった場合
+            logger.warning("No valid quiz data found from any source")
             return None
 
         except ValueError as e:
