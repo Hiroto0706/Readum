@@ -1,6 +1,8 @@
 import logging
+import json
+import re
 from operator import itemgetter
-from typing import Any, Dict
+from typing import Any
 
 from langchain_core.tools import tool
 from langchain_core.vectorstores import VectorStoreRetriever
@@ -124,57 +126,98 @@ class RAGAgentModelImpl(RAGAgentModel):
                     return None
 
             @tool
-            def refine_instruction_tool(
-                quiz: Quiz | None,
-                issues: list[str] = [],  # consistency_check → issues に変更
-            ) -> str:
+            def output_schema():
                 """
-                問題数や一貫性の問題がある場合の再生成指示文を返すツール
+                QuizおよびQuestionの構造化データスキーマを返す
+
+                クイズ生成時に使用する標準的なデータ構造を定義します。
+                このスキーマに厳密に従うことで、一貫性のあるクイズ生成が可能になります。
+
+                構造:
+                    questions (list[Question]): クイズの質問リスト
+                        Question:
+                            content (str): 質問文のテキスト（例:「人生において最も重要な資本は何か？」）
+                            options (dict): キーA,B,C,Dと対応する選択肢のテキストからなる辞書
+                                A (str): 選択肢A（例:「金融資本」）
+                                B (str): 選択肢B（例:「人的資本」）
+                                C (str): 選択肢C（例:「社会資本」）
+                                D (str): 選択肢D（例:「時間資本」）
+                            answer (str): 正解の選択肢のキー（例:「B」）
+                            explanation (str): 正解の理由と他の選択肢が不正解である理由の説明
+
+                Example:
+                    {
+                        "questions": [
+                            {
+                                "content": "人生において最も重要な資本は何か？",
+                                "options": {
+                                    "A": "金融資本",
+                                    "B": "人的資本",
+                                    "C": "社会資本",
+                                    "D": "時間資本"
+                                },
+                                "answer": "B",
+                                "explanation": "本文では人的資本が最も重要であると述べられています。金融資本は人的資本の結果として得られるものであり、社会資本は人的資本を基盤として構築されます。時間資本という概念は本文には登場しません。"
+                            }
+                        ]
+                    }
+
+                注意:
+                    - キー 'questions' を必ず使用してください（'quiz' ではありません）
+                    - 各質問には 'content' キーを使用してください（'question' ではありません）
+                    - 'options' は配列ではなく辞書形式にしてください
+                    - 'answer' は有効な選択肢（A, B, C, D）のいずれかである必要があります
                 """
-                if quiz is None:
-                    return "The context is insufficient to generate a quiz. Please provide more relevant information."
-
-                if not issues:  # 問題リストが空の場合
-                    return "The quiz looks good."
-
-                instruction = (
-                    "Please regenerate the quiz with the following corrections:\n"
-                )
-                instruction += "\n".join(f"- {issue}" for issue in issues)
-
-                logger.debug(f"Refinement instruction: {instruction}")
-                return instruction
+                schema = """
+                {
+                    "questions": [
+                        {
+                            "content": "質問文",
+                            "options": {
+                                "A": "選択肢A",
+                                "B": "選択肢B",
+                                "C": "選択肢C",
+                                "D": "選択肢D"
+                            },
+                            "answer": "A",
+                            "explanation": "解説文"
+                        }
+                    ]
+                }
+                """
+                return schema
 
             # RAGエージェント定義
             logger.info("Creating RAG quiz agent")
             self.rag_agent = create_react_agent(
                 model=self.llm,
-                tools=[generate_quiz_tool],
+                tools=[generate_quiz_tool, output_schema],
                 name="rag_quiz_agent",
                 prompt=(
                     "You are RAGQuizAgent. "
                     "Generate a quiz based on the stored context using "
                     "generate_quiz_tool(question_count, difficulty, instruction). "
-                    "Return None if context is insufficient."
+                    "Return None if context is insufficient. "
+                    "Use output_schema() to ensure your result follows the required format. "
+                    "YOUR FINAL OUTPUT MUST CONFORM TO THE SCHEMA PROVIDED BY OUTPUT_SCHEMA TOOL."
                 ),
             )
 
-            # 評価エージェント定義 - ツールを使わず評価させる
+            # 評価エージェント定義
             logger.info("Creating evaluation agent")
             self.evaluate_agent = create_react_agent(
                 model=self.llm,
-                tools=[refine_instruction_tool],
+                tools=[],
                 name="evaluate_agent",
                 prompt=(
                     "You are EvaluateAgent that reviews quizzes. Your task is to analyze a quiz and identify any issues.\n\n"
                     "Review Process:\n"
-                    "1. Check if the quiz has EXACTLY the specified number of questions. The quiz MUST have exactly the number requested.\n"
+                    "1. Check if the quiz has EXACTLY the specified number of questions.\n"
                     "2. Verify each question has a valid answer (must be one of: A, B, C, or D).\n"
-                    "3. Ensure the explanation for each question correctly matches and explains the chosen answer.\n"
-                    "4. Check for any inconsistencies between questions, answers, and explanations.\n\n"
-                    "If you find ANY issues, create a list of specific problems and use refine_instruction_tool(quiz, question_count, issues) "
-                    "to generate instructions for refinement. Be thorough and specific about what needs to be fixed.\n\n"
-                    "If no issues are found, use refine_instruction_tool(quiz, question_count) without an issues list."
+                    "3. Ensure the explanation for each question correctly matches the chosen answer.\n"
+                    "4. Check for any inconsistencies or errors in the content.\n\n"
+                    "If issues are found, explain them in detail. If no issues are found, simply state 'The quiz looks good.'\n"
+                    "Your role is to provide feedback - you don't need to directly modify the quiz."
                 ),
             )
 
@@ -184,12 +227,20 @@ class RAGAgentModelImpl(RAGAgentModel):
                 agents=[self.rag_agent, self.evaluate_agent],
                 model=self.llm,
                 prompt=(
-                    "You are a supervisor for quiz generation. "
-                    "Loop between rag_quiz_agent and evaluate_agent up to 5 times. "
-                    "If generate_quiz_tool returns None at any point, "
-                    "return None to indicate insufficient context. "
-                    "Your goal is to produce a high-quality quiz with the correct number of questions, "
-                    "where answers and explanations are consistent."
+                    "You are RAGQuizAgent. "
+                    "Generate a quiz based on the stored context using "
+                    "generate_quiz_tool(question_count, difficulty, instruction). "
+                    "IF CONTEXT IS INSUFFICIENT OR GENERATE_QUIZ_TOOL RETURNS NONE, YOU MUST RETURN ONLY THE STRING 'None' WITHOUT ANY ADDITIONAL TEXT OR FORMATTING. "
+                    "You MUST use output_schema() tool to understand the required format. "
+                    "YOUR FINAL OUTPUT MUST BE VALID JSON ONLY. "
+                    "DO NOT include any explanatory text, introductions, or descriptions before or after the JSON. "
+                    "DO NOT use markdown code blocks or any other formatting. "
+                    "JUST RETURN RAW JSON DATA OR THE STRING 'None'. "
+                    "The key must be 'questions' not 'quiz', and each question must have 'content', 'options', 'answer', and 'explanation'. "
+                    "The 'options' must be an object with keys A, B, C, D, not an array. "
+                    'EXAMPLE OF CORRECT OUTPUT FORMAT: {"questions":[{"content":"Question text","options":{"A":"Option A","B":"Option B","C":"Option C","D":"Option D"},"answer":"A","explanation":"Explanation text"}]} '
+                    "NEVER OUTPUT TEXT LIKE 'Here are the questions' OR 'The quiz is as follows'. "
+                    "ONLY OUTPUT JSON OR 'None'."
                 ),
             )
 
@@ -215,19 +266,43 @@ class RAGAgentModelImpl(RAGAgentModel):
                     "messages": [
                         {
                             "role": "user",
-                            "content": {
-                                "question_count": question_count,
-                                "difficulty": difficulty,
-                            },
+                            "content": f"Generate {question_count} quiz questions of difficulty '{difficulty}'.",
                         }
                     ]
                 }
             )
 
-            logger.info(
-                f"Successfully generated quiz with {len(result.questions)} questions via LangGraph"
-            )
-            return result
+            for item in result["messages"]:
+                print(f"Name: {item.name}")
+                print(item.content)
+                print("================")
+
+            # Supervisorからの出力を直接取得
+            for message in result["messages"]:
+                if hasattr(message, "name") and message.name == "supervisor":
+                    if isinstance(message.content, str):
+                        try:
+                            quiz_data = json.loads(message.content)
+                        except json.JSONDecodeError:
+                            json_match = re.search(r"({[\s\S]*})", message.content)
+                            if json_match:
+                                try:
+                                    quiz_data = json.loads(json_match.group(1))
+                                except:
+                                    continue
+                            else:
+                                continue
+                    else:
+                        quiz_data = message.content
+
+                    # "questions"プロパティが存在する場合は直接Quizオブジェクトを作成
+                    if "questions" in quiz_data and isinstance(
+                        quiz_data["questions"], list
+                    ):
+                        # 構造がすでに期待通りなのでそのままQuizオブジェクトを作成
+                        return Quiz(questions=quiz_data["questions"])
+
+            return None
 
         except ValueError as e:
             error_msg = f"Failed to parse LLM response: {str(e)}"

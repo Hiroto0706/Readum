@@ -204,7 +204,7 @@ class QuizCreator(BaseModel):
         )
 
         if rag_response is None:
-            raise InsufficientContextError
+            raise InsufficientContextError("Insufficient context to generate a quiz")
 
         return QuizResponse(
             id=uuid, preview=rag_response, difficulty_value=difficulty.value

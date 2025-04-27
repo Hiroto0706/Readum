@@ -33,12 +33,12 @@ class TestQuiz:
         assert len(quiz.questions) == 3
 
     def test_quiz_with_maximum_questions(self):
-        """最大数（20問）の質問でQuizを作成できることを確認"""
+        """最大数（10問）の質問でQuizを作成できることを確認"""
         questions = [create_test_question(f"Question {i}", "A") for i in range(1, 21)]
 
         quiz = Quiz(questions=questions)
 
-        assert len(quiz.questions) == 20
+        assert len(quiz.questions) == 10
 
     def test_quiz_with_too_few_questions(self):
         """質問数が少なすぎる場合にエラーが発生することを確認"""
@@ -48,17 +48,17 @@ class TestQuiz:
         with pytest.raises(ValueError) as exc_info:
             Quiz(questions=questions)
 
-        assert "質問は3問から20問の範囲である必要があります" in str(exc_info.value)
+        assert "質問は3問から10問の範囲である必要があります" in str(exc_info.value)
 
     def test_quiz_with_too_many_questions(self):
         """質問数が多すぎる場合にエラーが発生することを確認"""
-        # 21問ある（20問超過）
+        # 21問ある（10問超過）
         questions = [create_test_question(f"Question {i}", "A") for i in range(1, 22)]
 
         with pytest.raises(ValueError) as exc_info:
             Quiz(questions=questions)
 
-        assert "質問は3問から20問の範囲である必要があります" in str(exc_info.value)
+        assert "質問は3問から10問の範囲である必要があります" in str(exc_info.value)
 
     def test_quiz_immutability(self):
         """Quizオブジェクトが不変であることを確認"""

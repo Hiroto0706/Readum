@@ -25,7 +25,7 @@ class QuizRequest(BaseModel):
     )
     difficulty: Difficulty = Field(..., description="クイズの難易度")
     question_count: int = Field(
-        ..., alias="questionCount", description="生成するクイズの数", ge=3, le=20
+        ..., alias="questionCount", description="生成するクイズの数", ge=3, le=10
     )
 
     model_config = ConfigDict(populate_by_name=True, frozen=True)
@@ -72,7 +72,7 @@ class Question(BaseModel):
 
 class Quiz(BaseModel):
     questions: List[Question] = Field(
-        ..., description="クイズのリスト", min_length=3, max_length=20
+        ..., description="クイズのリスト", min_length=3, max_length=10
     )
 
     model_config = ConfigDict(frozen=True)
