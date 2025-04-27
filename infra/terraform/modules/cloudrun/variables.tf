@@ -58,6 +58,11 @@ variable "ALLOW_ORIGIN" {
   type        = string
 }
 
+variable "USE_LANGGRAPH" {
+  description = "LangGraphを用いるかどうか"
+  type        = string
+}
+
 variable "GPT_MODEL" {
   description = "GPTモデル名"
   type        = string
