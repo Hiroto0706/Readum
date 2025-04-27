@@ -198,10 +198,16 @@ class QuizCreator(BaseModel):
         retriever = vector_store_handler.as_retriever(directory_path)
         rag_agent = RAGAgentModelImpl(llm=llm, prompt=prompt, retriever=retriever)
 
-        rag_response = rag_agent.graph_run(
-            question_count=question_count,
-            difficulty=difficulty.value,
-        )
+        if settings.app.USE_LANGGRAPH:
+            rag_response = rag_agent.graph_run(
+                question_count=question_count,
+                difficulty=difficulty.value,
+            )
+        else:
+            rag_response = rag_agent.invoke_chain(
+                question_count=question_count,
+                difficulty=difficulty.value,
+            )
 
         if rag_response is None:
             logger.warning("Graph run returned None")

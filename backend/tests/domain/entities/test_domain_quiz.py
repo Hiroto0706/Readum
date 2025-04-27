@@ -34,7 +34,7 @@ class TestQuiz:
 
     def test_quiz_with_maximum_questions(self):
         """最大数（10問）の質問でQuizを作成できることを確認"""
-        questions = [create_test_question(f"Question {i}", "A") for i in range(1, 21)]
+        questions = [create_test_question(f"Question {i}", "A") for i in range(1, 11)]
 
         quiz = Quiz(questions=questions)
 
@@ -53,7 +53,7 @@ class TestQuiz:
     def test_quiz_with_too_many_questions(self):
         """質問数が多すぎる場合にエラーが発生することを確認"""
         # 21問ある（10問超過）
-        questions = [create_test_question(f"Question {i}", "A") for i in range(1, 22)]
+        questions = [create_test_question(f"Question {i}", "A") for i in range(1, 12)]
 
         with pytest.raises(ValueError) as exc_info:
             Quiz(questions=questions)

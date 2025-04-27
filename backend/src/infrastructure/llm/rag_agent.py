@@ -1,6 +1,5 @@
 import logging
 import json
-import re
 from operator import itemgetter
 from typing import Any
 
@@ -71,8 +70,7 @@ class RAGAgentModelImpl(RAGAgentModel):
         try:
             response = self.rag_chain.invoke(
                 {
-                    # FIXME: 一旦inputは固定値としておく
-                    "input": "Please generate the quiz according to the above instructions.",
+                    "input": f"Generate {question_count} quiz questions of difficulty '{difficulty}'.",
                     "question_count": question_count,
                     "difficulty": difficulty,
                 }
@@ -280,12 +278,6 @@ class RAGAgentModelImpl(RAGAgentModel):
                 print(item.content)
                 print("================")
 
-            # デバッグ用にメッセージ構造をログ出力
-            logger.debug("LangGraph messages structure:")
-            for item in result["messages"]:
-                if hasattr(item, "name"):
-                    logger.debug(f"Message from {item.name}")
-
             # supervisorからの最終出力を処理
             for message in reversed(result["messages"]):
                 if hasattr(message, "name") and message.name == "supervisor":
@@ -307,32 +299,6 @@ class RAGAgentModelImpl(RAGAgentModel):
                         except json.JSONDecodeError:
                             logger.warning(
                                 f"Failed to parse supervisor content as JSON: {content[:100]}..."
-                            )
-
-            # rag_quiz_agentの出力をチェック
-            for message in result["messages"]:
-                if hasattr(message, "name") and message.name == "rag_quiz_agent":
-                    content = message.content
-                    if (
-                        content
-                        and isinstance(content, str)
-                        and content.strip() not in ["None", ""]
-                    ):
-                        try:
-                            # JSONデータとして解析
-                            if content.strip().startswith("{"):
-                                data = json.loads(content)
-                                if "questions" in data and isinstance(
-                                    data["questions"], list
-                                ):
-                                    # RAGエージェントから有効なクイズデータが見つかった
-                                    logger.info(
-                                        "Valid quiz data found from rag_quiz_agent"
-                                    )
-                                    return Quiz(questions=data["questions"])
-                        except json.JSONDecodeError:
-                            logger.warning(
-                                f"Failed to parse RAG agent content as JSON: {content[:100]}..."
                             )
 
             # 有効なクイズデータが見つからなかった場合
