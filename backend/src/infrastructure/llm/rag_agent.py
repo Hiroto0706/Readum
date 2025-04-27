@@ -227,10 +227,12 @@ class RAGAgentModelImpl(RAGAgentModel):
                 agents=[self.rag_agent, self.evaluate_agent],
                 model=self.llm,
                 prompt=(
-                    "You are RAGQuizAgent. Follow these steps: "
-                    "1. First, generate a quiz based on the stored context using generate_quiz_tool(question_count, difficulty, instruction). "
-                    "2. Then, evaluate the generated quiz using evaluate_agent to check if the questions are appropriate, accurate, and well-formed. "
-                    "3. If the evaluation suggests improvements, have the rag_quiz_agent generate a revised quiz. "
+                    "You are RAGQuizAgent. Follow these steps STRICTLY IN THIS ORDER: "
+                    "1. FIRST, generate a quiz based on the stored context using generate_quiz_tool(question_count, difficulty, instruction). "
+                    "2. SECOND, you MUST evaluate the generated quiz using evaluate_agent to check if the questions are appropriate, accurate, and well-formed. "
+                    "3. THIRD, if the evaluation suggests improvements OR if the number of questions does not match the requested amount, ALWAYS have the rag_quiz_agent generate a revised quiz. "
+                    "4. FOURTH, repeat steps 2-3 until the quiz meets all requirements including the correct number of questions. "
+                    "THIS WORKFLOW IS MANDATORY - DO NOT SKIP ANY STEP OR IGNORE EVALUATION FEEDBACK! "
                     "IF CONTEXT IS INSUFFICIENT OR GENERATE_QUIZ_TOOL RETURNS NONE, YOU MUST RETURN ONLY THE STRING 'None' WITHOUT ANY ADDITIONAL TEXT OR FORMATTING. "
                     "You MUST use output_schema() tool to understand the required format. "
                     "YOUR FINAL OUTPUT MUST BE VALID JSON ONLY. "
