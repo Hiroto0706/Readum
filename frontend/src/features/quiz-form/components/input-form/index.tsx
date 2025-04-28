@@ -45,8 +45,8 @@ export const InputForm: React.FC<Props> = ({
     if (!questionCount) {
       return;
     }
-    if (questionCount < 3 || questionCount > 20) {
-      setError("問題数は3〜20問の間で設定してください");
+    if (questionCount < 3 || questionCount > 10) {
+      setError("問題数は3〜10問の間で設定してください");
       setIsSubmitting(false);
       return;
     }
@@ -74,10 +74,13 @@ export const InputForm: React.FC<Props> = ({
         difficulty,
         questionCount,
       });
+
       if (result.data) {
         setQuizResponse(result.data);
       } else {
-        throw new Error("クイズの作成に失敗しました");
+        setError(
+          result.error?.message.toString() || "入力している内容が不正です"
+        );
       }
     } catch (error) {
       console.error("Error:", error);

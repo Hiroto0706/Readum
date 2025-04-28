@@ -19,7 +19,7 @@ class QuizOption(BaseModel):
 class Question(BaseModel):
     question: str = Field(..., description="質問内容")
     options: QuizOption = Field(..., description="選択肢")
-    answer: str = Field(..., description="正解の選択肢")
+    answer: str = Field(..., description="正解の選択肢", alias="correctAnswer")
     explanation: str = Field(..., description="解答の説明")
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, populate_by_name=True)

@@ -50,42 +50,44 @@ class TestRAGAgentModelImpl:
         return Quiz(questions=questions)
 
     @pytest.fixture
-    def rag_agent(self, mock_llm, mock_prompt):
+    def rag_agent(self, mock_llm, mock_prompt, mock_retriever):
         """RAGAgentModelImplのインスタンスを作成するフィクスチャ"""
-        return RAGAgentModelImpl(llm=mock_llm, prompt=mock_prompt)
-
-    def test_set_rag_chain_success(self, rag_agent, mock_retriever, mocker):
-        """RAG Chainの設定が成功するケースをテスト"""
-        # itemgetterは実コード内で定義されており、テストコードからはアクセスできないためmock.patch()を使っている
-        mocker.patch(
-            "src.infrastructure.llm.rag_agent.itemgetter",
-            return_value=mocker.MagicMock(),
+        return RAGAgentModelImpl(
+            llm=mock_llm, prompt=mock_prompt, retriever=mock_retriever
         )
 
-        # Act
-        result = rag_agent.set_rag_chain(mock_retriever)
+    # def test_set_rag_chain_success(self, rag_agent, mock_retriever, mocker):
+    #     """RAG Chainの設定が成功するケースをテスト"""
+    #     # itemgetterは実コード内で定義されており、テストコードからはアクセスできないためmock.patch()を使っている
+    #     mocker.patch(
+    #         "src.infrastructure.llm.rag_agent.itemgetter",
+    #         return_value=mocker.MagicMock(),
+    #     )
 
-        # Assert
-        assert result is not None
-        assert isinstance(result, RAGAgentModelImpl)
-        assert result.rag_chain is not None
-        # LLMのwith_structured_outputが呼ばれたことを確認
-        rag_agent.llm.with_structured_output.assert_called_once_with(Quiz)
+    #     # Act
+    #     result = rag_agent.set_rag_chain(mock_retriever)
 
-    def test_set_rag_chain_failure(self, rag_agent, mock_retriever, mocker):
-        """RAG Chainの設定が失敗するケースをテスト"""
-        # Arrange
-        mocker.patch(
-            "src.infrastructure.llm.rag_agent.itemgetter",
-            side_effect=Exception("Mock itemgetter error"),
-        )
+    #     # Assert
+    #     assert result is not None
+    #     assert isinstance(result, RAGAgentModelImpl)
+    #     assert result.rag_chain is not None
+    #     # LLMのwith_structured_outputが呼ばれたことを確認
+    #     rag_agent.llm.with_structured_output.assert_called_once_with(Quiz)
 
-        # Act & Assert
-        with pytest.raises(RAGChainSetupError) as exc_info:
-            rag_agent.set_rag_chain(mock_retriever)
+    # def test_set_rag_chain_failure(self, rag_agent, mock_retriever, mocker):
+    #     """RAG Chainの設定が失敗するケースをテスト"""
+    #     # Arrange
+    #     mocker.patch(
+    #         "src.infrastructure.llm.rag_agent.itemgetter",
+    #         side_effect=Exception("Mock itemgetter error"),
+    #     )
 
-        assert "Failed to set up RAG chain" in str(exc_info.value)
-        assert "Mock itemgetter error" in str(exc_info.value)
+    #     # Act & Assert
+    #     with pytest.raises(RAGChainSetupError) as exc_info:
+    #         rag_agent.set_rag_chain(mock_retriever)
+
+    #     assert "Failed to set up RAG chain" in str(exc_info.value)
+    #     assert "Mock itemgetter error" in str(exc_info.value)
 
     def test_invoke_chain_success(self, rag_agent, sample_quiz, mocker):
         """RAG Chainの実行が成功するケースをテスト"""

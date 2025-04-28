@@ -137,10 +137,10 @@ class TestQuizRequest:
                 type=QuizType.TEXT,
                 content="テストコンテンツ",
                 difficulty=Difficulty.INTERMEDIATE,
-                questionCount=21,  # 最大値は20
+                questionCount=11,  # 最大値は10
             )
 
-        assert "less than or equal to 20" in str(exc_info.value).lower() or "le" in str(
+        assert "less than or equal to 10" in str(exc_info.value).lower() or "le" in str(
             exc_info.value
         )
 
@@ -288,18 +288,18 @@ class TestQuiz:
         assert len(quiz.questions) == 3
 
     def test_maximum_questions(self):
-        """最大問題数(20問)のQuizを作成できることを確認"""
+        """最大問題数(10問)のQuizを作成できることを確認"""
         options = Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D")
 
         questions = [
             Question(
                 question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
-            for i in range(1, 21)  # 20問（最大値）
+            for i in range(1, 11)  # 10問（最大値）
         ]
 
         quiz = Quiz(questions=questions)
-        assert len(quiz.questions) == 20
+        assert len(quiz.questions) == 10
 
     def test_too_few_questions(self):
         """問題数が少なすぎる場合にエラーになることを確認"""
@@ -325,13 +325,13 @@ class TestQuiz:
             Question(
                 question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
-            for i in range(1, 22)  # 21問（最大は20問）
+            for i in range(1, 12)  # 11問（最大は10問）
         ]
 
         with pytest.raises(ValidationError) as exc_info:
             Quiz(questions=questions)
 
-        assert "max_length" in str(exc_info.value).lower() or "20" in str(
+        assert "max_length" in str(exc_info.value).lower() or "10" in str(
             exc_info.value
         )
 
