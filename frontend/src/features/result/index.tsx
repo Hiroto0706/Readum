@@ -76,7 +76,7 @@ export const Result: React.FC<Props> = ({ result }) => {
             key={qIndex}
             qIndex={qIndex}
             options={question.options}
-            question={question.content}
+            question={question.question}
             answer={question.answer}
             explanation={question.explanation}
             selectedOptions={result.selectedOptions}

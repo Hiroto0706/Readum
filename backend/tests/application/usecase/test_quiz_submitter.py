@@ -24,7 +24,7 @@ class TestQuizSubmitter:
         quiz = Quiz(
             questions=[
                 Question(
-                    content=f"テスト質問{i}",
+                    question=f"テスト質問{i}",
                     options=Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D"),
                     answer="A",
                     explanation=f"テスト解説{i}",

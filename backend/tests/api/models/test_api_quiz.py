@@ -210,10 +210,10 @@ class TestQuestion:
         options = Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D")
 
         question = Question(
-            content="テスト質問", options=options, answer="A", explanation="テスト解説"
+            question="テスト質問", options=options, answer="A", explanation="テスト解説"
         )
 
-        assert question.content == "テスト質問"
+        assert question.question == "テスト質問"
         assert question.options == options
         assert question.answer == "A"
         assert question.explanation == "テスト解説"
@@ -235,16 +235,16 @@ class TestQuestion:
         options = Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D")
 
         question = Question(
-            content="テスト質問", options=options, answer="A", explanation="テスト解説"
+            question="テスト質問", options=options, answer="A", explanation="テスト解説"
         )
 
         with pytest.raises((ValidationError, TypeError)):
-            question.content = "変更された質問"
+            question.question = "変更された質問"
 
     def test_with_dictionary_options(self):
         """辞書形式のoptionsでも作成できることを確認"""
         question = Question(
-            content="テスト質問",
+            question="テスト質問",
             options={"A": "選択肢A", "B": "選択肢B", "C": "選択肢C", "D": "選択肢D"},
             answer="A",
             explanation="テスト解説",
@@ -262,7 +262,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 6)  # 5問
         ]
@@ -270,8 +270,8 @@ class TestQuiz:
         quiz = Quiz(questions=questions)
 
         assert len(quiz.questions) == 5
-        assert quiz.questions[0].content == "質問1"
-        assert quiz.questions[4].content == "質問5"
+        assert quiz.questions[0].question == "質問1"
+        assert quiz.questions[4].question == "質問5"
 
     def test_minimum_questions(self):
         """最小問題数(3問)のQuizを作成できることを確認"""
@@ -279,7 +279,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 4)  # 3問（最小値）
         ]
@@ -293,7 +293,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 11)  # 10問（最大値）
         ]
@@ -307,7 +307,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 3)  # 2問（最小は3問）
         ]
@@ -323,7 +323,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 12)  # 11問（最大は10問）
         ]
@@ -341,7 +341,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 6)
         ]
@@ -359,7 +359,7 @@ class TestQuizResponse:
         # DomainQuestionの作成
         domain_questions = [
             DomainQuestion(
-                content=f"ドメイン質問{i}",
+                question=f"ドメイン質問{i}",
                 options={"A": "選択A", "B": "選択B", "C": "選択C", "D": "選択D"},
                 answer="A",
                 explanation=f"ドメイン解説{i}",
@@ -407,7 +407,7 @@ class TestUserAnswer:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 6)  # 5問
         ]

@@ -5,10 +5,10 @@ from src.domain.entities.question import Question, QuizOption
 
 
 # テスト用のQuestion作成ヘルパー関数
-def create_test_question(content="Test Question", answer="A"):
+def create_test_question(question="Test Question", answer="A"):
     options = QuizOption(A="Option A", B="Option B", C="Option C", D="Option D")
     return Question(
-        content=content, options=options, answer=answer, explanation="Test explanation"
+        question=question, options=options, answer=answer, explanation="Test explanation"
     )
 
 
@@ -21,8 +21,8 @@ class TestQuiz:
         quiz = Quiz(questions=questions)
 
         assert len(quiz.questions) == 5
-        assert quiz.questions[0].content == "Question 1"
-        assert quiz.questions[4].content == "Question 5"
+        assert quiz.questions[0].question == "Question 1"
+        assert quiz.questions[4].question == "Question 5"
 
     def test_quiz_with_minimum_questions(self):
         """最小数（3問）の質問でQuizを作成できることを確認"""

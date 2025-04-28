@@ -7,10 +7,13 @@ from src.domain.entities.question import Question, QuizOption
 
 
 # テスト用のQuestion作成ヘルパー関数
-def create_test_question(content="Test Question", answer="A"):
+def create_test_question(question="Test Question", answer="A"):
     options = QuizOption(A="Option A", B="Option B", C="Option C", D="Option D")
     return Question(
-        content=content, options=options, answer=answer, explanation="Test explanation"
+        question=question,
+        options=options,
+        answer=answer,
+        explanation="Test explanation",
     )
 
 

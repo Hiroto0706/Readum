@@ -123,68 +123,6 @@ class RAGAgentModelImpl(RAGAgentModel):
                     logger.error(f"Error Generating quiz: {str(e)}")
                     return None
 
-            @tool
-            def output_schema():
-                """
-                QuizおよびQuestionの構造化データスキーマを返す
-
-                クイズ生成時に使用する標準的なデータ構造を定義します。
-                このスキーマに厳密に従うことで、一貫性のあるクイズ生成が可能になります。
-
-                構造:
-                    questions (list[Question]): クイズの質問リスト
-                        Question:
-                            content (str): 質問文のテキスト（例:「人生において最も重要な資本は何か？」）
-                            options (dict): キーA,B,C,Dと対応する選択肢のテキストからなる辞書
-                                A (str): 選択肢A（例:「金融資本」）
-                                B (str): 選択肢B（例:「人的資本」）
-                                C (str): 選択肢C（例:「社会資本」）
-                                D (str): 選択肢D（例:「時間資本」）
-                            answer (str): 正解の選択肢のキー（例:「B」）
-                            explanation (str): 正解の理由と他の選択肢が不正解である理由の説明
-
-                Example:
-                    {
-                        "questions": [
-                            {
-                                "content": "人生において最も重要な資本は何か？",
-                                "options": {
-                                    "A": "金融資本",
-                                    "B": "人的資本",
-                                    "C": "社会資本",
-                                    "D": "時間資本"
-                                },
-                                "answer": "B",
-                                "explanation": "本文では人的資本が最も重要であると述べられています。金融資本は人的資本の結果として得られるものであり、社会資本は人的資本を基盤として構築されます。時間資本という概念は本文には登場しません。"
-                            }
-                        ]
-                    }
-
-                注意:
-                    - キー 'questions' を必ず使用してください（'quiz' ではありません）
-                    - 各質問には 'content' キーを使用してください（'question' ではありません）
-                    - 'options' は配列ではなく辞書形式にしてください
-                    - 'answer' は有効な選択肢（A, B, C, D）のいずれかである必要があります
-                """
-                schema = """
-                {
-                    "questions": [
-                        {
-                            "content": "質問文",
-                            "options": {
-                                "A": "選択肢A",
-                                "B": "選択肢B",
-                                "C": "選択肢C",
-                                "D": "選択肢D"
-                            },
-                            "answer": "A",
-                            "explanation": "解説文"
-                        }
-                    ]
-                }
-                """
-                return schema
-
             # RAGエージェント定義
             logger.info("Creating RAG quiz agent")
             self.rag_agent = create_react_agent(
@@ -314,10 +252,6 @@ class RAGAgentModelImpl(RAGAgentModel):
                     # フィールド名を修正する
                     # AIが誤ったフィールド名で生成する場合があるため
                     for q in questions:
-                        # questionフィールドをcontentに変換
-                        if "question" in q and "content" not in q:
-                            q["content"] = q.pop("question")
-
                         # correctAnswerフィールドをanswerに変換
                         if "correctAnswer" in q and "answer" not in q:
                             q["answer"] = q.pop("correctAnswer")

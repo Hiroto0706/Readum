@@ -54,6 +54,7 @@ export const QuizForm: React.FC = () => {
     } catch (error) {
       console.error("回答の送信中にエラーが発生しました:", error);
       setError("回答の送信中にエラーが発生しました");
+      setIsSubmitted(false);
     }
   };
 
@@ -81,6 +82,7 @@ export const QuizForm: React.FC = () => {
           handleAnswerSelect={handleAnswerSelect}
           handleSubmitAnswer={handleSubmitAnswer}
           isSubmitted={isSubmitted}
+          error={error}
         />
       )}
     </>

@@ -6,7 +6,7 @@ export interface Option {
 }
 
 export interface Question {
-  content: string;
+  question: string;
   options: Option;
   answer: string;
   explanation: string;
