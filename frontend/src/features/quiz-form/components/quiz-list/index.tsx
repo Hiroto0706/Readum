@@ -11,6 +11,7 @@ interface Props {
   handleAnswerSelect: (questionIndex: number, answer: string) => void;
   handleSubmitAnswer: () => Promise<void>;
   isSubmitted: boolean;
+  error: string;
 }
 
 export const QuizList: React.FC<Props> = ({
@@ -19,6 +20,7 @@ export const QuizList: React.FC<Props> = ({
   handleAnswerSelect,
   handleSubmitAnswer,
   isSubmitted,
+  error,
 }) => {
   const questionCount = quizResponse.preview.questions.length;
   const answeredCount = Object.keys(userAnswers).length;
@@ -42,7 +44,7 @@ export const QuizList: React.FC<Props> = ({
             key={qIndex}
             qIndex={qIndex}
             options={question.options}
-            question={question.content}
+            question={question.question}
             userAnswers={userAnswers}
             handleAnswerSelect={handleAnswerSelect}
             isSubmitted={isSubmitted}
@@ -60,6 +62,7 @@ export const QuizList: React.FC<Props> = ({
         handleSubmitAnswer={handleSubmitAnswer}
         questionCount={questionCount}
         isSubmitted={isSubmitted}
+        error={error}
       />
     </div>
   );

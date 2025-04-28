@@ -40,7 +40,7 @@ class TestRAGAgentModelImpl:
         options = QuizOption(A="Option A", B="Option B", C="Option C", D="Option D")
         questions = [
             Question(
-                content=f"Test question {i}",
+                question=f"Test question {i}",
                 options=options,
                 answer="A",
                 explanation=f"Test explanation {i}",

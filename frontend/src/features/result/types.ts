@@ -28,7 +28,7 @@ interface Option {
 }
 
 interface Question {
-  content: string;
+  question: string;
   options: Option;
   answer: string;
   explanation: string;
