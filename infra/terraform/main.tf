@@ -66,6 +66,7 @@ module "cloudrun" {
   # バックエンド環境変数
   ENV                   = var.ENV
   ALLOW_ORIGIN          = var.ALLOW_ORIGIN
+  USE_LANGGRAPH         = var.USE_LANGGRAPH
   GPT_MODEL             = var.GPT_MODEL
   TEXT_EMBEDDINGS_MODEL = var.TEXT_EMBEDDINGS_MODEL
   additional_env_vars   = var.additional_env_vars

@@ -17,6 +17,8 @@ langsmith = "*"
 google-cloud-storage = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+langgraph = "*"
+langgraph-supervisor = "*"
 
 [dev-packages]
 

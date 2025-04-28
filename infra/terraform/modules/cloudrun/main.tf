@@ -114,6 +114,10 @@ resource "google_cloud_run_v2_service" "readum_backend" {
         value = var.ALLOW_ORIGIN
       }
       env {
+        name  = "USE_LANGGRAPH"
+        value = var.USE_LANGGRAPH
+      }
+      env {
         name  = "GPT_MODEL"
         value = var.GPT_MODEL
       }

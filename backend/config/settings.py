@@ -16,6 +16,9 @@ class AppSettings(BaseModel):
     INFO_LEV: int = 20
     LOG_LEVEL: ClassVar[int] = DEBUG_LEV if ENV == "dev" else INFO_LEV
 
+    # LangGraphを用いてクイズを生成するかどうか
+    USE_LANGGRAPH: ClassVar[bool] = os.getenv("USE_LANGGRAPH", "false") == "true"
+
 
 # TODO: APIのバリデーションはあったほうがいい
 class LLMSettings(BaseModel):
