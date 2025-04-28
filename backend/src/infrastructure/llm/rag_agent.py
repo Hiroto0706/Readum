@@ -228,20 +228,17 @@ class RAGAgentModelImpl(RAGAgentModel):
                     "You are RAGQuizAgent. Follow these steps STRICTLY IN THIS ORDER: "
                     "1. FIRST, generate a quiz based on the stored context using generate_quiz_tool(question_count, difficulty, instruction). "
                     "2. SECOND, you MUST evaluate the generated quiz using evaluate_agent to check if the questions are appropriate, accurate, and well-formed. "
-                    "3. THIRD, if the evaluation suggests improvements OR if the number of questions does not match the requested amount, ALWAYS have the rag_quiz_agent generate a revised quiz. "
-                    "4. FOURTH, repeat steps 2-3 until the quiz meets all requirements including the correct number of questions. "
-                    "THIS WORKFLOW IS MANDATORY - DO NOT SKIP ANY STEP OR IGNORE EVALUATION FEEDBACK! "
+                    "3. THIRD, if the evaluation suggests improvements OR if the number of questions does not match the requested amount, you MUST provide feedback to the rag_quiz_agent. "
+                    "4. FOURTH, have the rag_quiz_agent generate a revised quiz with the feedback as instruction. "
+                    "5. FIFTH, repeat steps 2-4 MAXIMUM 3 MORE TIMES (total of 4 quiz generation attempts). "
+                    "6. FINALLY, after at most 4 attempts or when the quiz meets the requirements, return EXACTLY the output from the rag_quiz_agent WITHOUT ANY MODIFICATION. "
+                    "IMPORTANT: DO NOT ATTEMPT MORE THAN 4 GENERATIONS TOTAL. After 4 attempts, return the best result available. "
                     "IF CONTEXT IS INSUFFICIENT OR GENERATE_QUIZ_TOOL RETURNS NONE, YOU MUST RETURN ONLY THE STRING 'None' WITHOUT ANY ADDITIONAL TEXT OR FORMATTING. "
-                    "You MUST use output_schema() tool to understand the required format. "
-                    "YOUR FINAL OUTPUT MUST BE VALID JSON ONLY. "
+                    "IMPORTANT: YOUR FINAL OUTPUT MUST BE EXACTLY THE SAME AS THE FINAL OUTPUT FROM THE RAG_QUIZ_AGENT. "
+                    "DO NOT MODIFY, REFORMAT, OR ADD ANY TEXT TO THE RAG_QUIZ_AGENT'S OUTPUT. "
                     "DO NOT include any explanatory text, introductions, or descriptions before or after the JSON. "
                     "DO NOT use markdown code blocks or any other formatting. "
-                    "JUST RETURN RAW JSON DATA OR THE STRING 'None'. "
-                    "The key must be 'questions' not 'quiz', and each question must have 'content', 'options', 'answer', and 'explanation'. "
-                    "The 'options' must be an object with keys A, B, C, D, not an array. "
-                    'EXAMPLE OF CORRECT OUTPUT FORMAT: {"questions":[{"content":"Question text","options":{"A":"Option A","B":"Option B","C":"Option C","D":"Option D"},"answer":"A","explanation":"Explanation text"}]} '
-                    "NEVER OUTPUT TEXT LIKE 'Here are the questions' OR 'The quiz is as follows'. "
-                    "ONLY OUTPUT JSON OR 'None'."
+                    "RETURN EXACTLY THE RAW JSON FROM RAG_QUIZ_AGENT OR THE STRING 'None'. "
                 ),
             )
 
