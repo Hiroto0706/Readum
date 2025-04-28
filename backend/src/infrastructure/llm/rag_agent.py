@@ -189,7 +189,8 @@ class RAGAgentModelImpl(RAGAgentModel):
             logger.info("Creating RAG quiz agent")
             self.rag_agent = create_react_agent(
                 model=self.llm,
-                tools=[generate_quiz_tool, output_schema],
+                # tools=[generate_quiz_tool, output_schema],
+                tools=[generate_quiz_tool],
                 name="rag_quiz_agent",
                 prompt=(
                     "You are RAGQuizAgent. "
@@ -276,6 +277,7 @@ class RAGAgentModelImpl(RAGAgentModel):
                 print("================")
 
             # supervisorからの最終出力を処理
+            supervisor_data = None
             for message in reversed(result["messages"]):
                 if hasattr(message, "name") and message.name == "supervisor":
                     content = message.content
@@ -285,18 +287,43 @@ class RAGAgentModelImpl(RAGAgentModel):
                         and content.strip() not in ["None", ""]
                     ):
                         try:
-                            # JSONデータとして解析
                             data = json.loads(content)
-                            if "questions" in data and isinstance(
-                                data["questions"], list
-                            ):
-                                # 有効なクイズデータが見つかった
-                                logger.info("Valid quiz data found from supervisor")
-                                return Quiz(questions=data["questions"])
+                            if "quiz" in data:
+                                quiz_data = data["quiz"]
+                                # 両方の形式に対応
+                                if (
+                                    isinstance(quiz_data, dict)
+                                    and "questions" in quiz_data
+                                ):
+                                    supervisor_data = quiz_data["questions"]
+                                    logger.info(
+                                        f"Found questions from supervisor in nested structure"
+                                    )
+                                elif isinstance(quiz_data, list):
+                                    supervisor_data = quiz_data
+                                    logger.info(
+                                        f"Found questions from supervisor in direct list"
+                                    )
                         except json.JSONDecodeError:
                             logger.warning(
-                                f"Failed to parse supervisor content as JSON: {content[:100]}..."
+                                f"Failed to parse supervisor content as JSON"
                             )
+
+                questions = supervisor_data
+                if questions:
+                    # フィールド名を修正する
+                    # AIが誤ったフィールド名で生成する場合があるため
+                    for q in questions:
+                        # questionフィールドをcontentに変換
+                        if "question" in q and "content" not in q:
+                            q["content"] = q.pop("question")
+
+                        # correctAnswerフィールドをanswerに変換
+                        if "correctAnswer" in q and "answer" not in q:
+                            q["answer"] = q.pop("correctAnswer")
+
+                logger.info(f"Using valid quiz data with {len(questions)} questions")
+                return Quiz(questions=questions)
 
             # 有効なクイズデータが見つからなかった場合
             logger.warning("No valid quiz data found from any source")
