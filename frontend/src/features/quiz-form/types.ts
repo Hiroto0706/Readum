@@ -6,7 +6,7 @@ export interface Option {
 }
 
 export interface Question {
-  content: string;
+  question: string;
   options: Option;
   answer: string;
   explanation: string;
@@ -14,6 +14,11 @@ export interface Question {
 
 export interface Quiz {
   questions: Question[];
+}
+
+export interface ErrorResponse {
+  status: number;
+  message: string;
 }
 
 export interface QuizResponse {

@@ -94,6 +94,11 @@ variable "ALLOW_ORIGIN" {
   default     = "*" # デフォルト値を設定
 }
 
+variable "USE_LANGGRAPH" {
+  description = "LangGraphを用いるかどうか"
+  type        = string
+}
+
 variable "GPT_MODEL" {
   description = "GPTモデル名"
   type        = string

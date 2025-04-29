@@ -64,13 +64,13 @@ class TestQuestion:
         """有効なQuestionを作成できることを確認"""
         options = QuizOption(A="Option A", B="Option B", C="Option C", D="Option D")
         question = Question(
-            content="What is the question?",
+            question="What is the question?",
             options=options,
             answer="A",
             explanation="This is the explanation",
         )
 
-        assert question.content == "What is the question?"
+        assert question.question == "What is the question?"
         assert question.options == options
         assert question.answer == "A"
         assert question.explanation == "This is the explanation"
@@ -86,7 +86,7 @@ class TestQuestion:
         # optionsが欠けている
         with pytest.raises(ValidationError):
             Question(
-                content="What is the question?",
+                question="What is the question?",
                 answer="A",
                 explanation="This is the explanation",
             )
@@ -95,14 +95,14 @@ class TestQuestion:
         """Questionがイミュータブル（変更不可）であることを確認"""
         options = QuizOption(A="Option A", B="Option B", C="Option C", D="Option D")
         question = Question(
-            content="What is the question?",
+            question="What is the question?",
             options=options,
             answer="A",
             explanation="This is the explanation",
         )
 
         with pytest.raises(Exception):
-            question.content = "Changed question"
+            question.question = "Changed question"
 
     def test_with_long_content(self):
         """長い質問内容でも正常に作成できることを確認"""
@@ -110,18 +110,18 @@ class TestQuestion:
         long_content = "A" * 1000  # 1000文字の質問
 
         question = Question(
-            content=long_content,
+            question=long_content,
             options=options,
             answer="A",
             explanation="This is the explanation",
         )
 
-        assert question.content == long_content
+        assert question.question == long_content
 
     def test_direct_dict_options(self):
         """辞書からオプションを作成できることを確認"""
         question = Question(
-            content="What is the question?",
+            question="What is the question?",
             options={
                 "A": "Option A",
                 "B": "Option B",

@@ -137,10 +137,10 @@ class TestQuizRequest:
                 type=QuizType.TEXT,
                 content="テストコンテンツ",
                 difficulty=Difficulty.INTERMEDIATE,
-                questionCount=21,  # 最大値は20
+                questionCount=11,  # 最大値は10
             )
 
-        assert "less than or equal to 20" in str(exc_info.value).lower() or "le" in str(
+        assert "less than or equal to 10" in str(exc_info.value).lower() or "le" in str(
             exc_info.value
         )
 
@@ -210,10 +210,10 @@ class TestQuestion:
         options = Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D")
 
         question = Question(
-            content="テスト質問", options=options, answer="A", explanation="テスト解説"
+            question="テスト質問", options=options, answer="A", explanation="テスト解説"
         )
 
-        assert question.content == "テスト質問"
+        assert question.question == "テスト質問"
         assert question.options == options
         assert question.answer == "A"
         assert question.explanation == "テスト解説"
@@ -235,16 +235,16 @@ class TestQuestion:
         options = Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D")
 
         question = Question(
-            content="テスト質問", options=options, answer="A", explanation="テスト解説"
+            question="テスト質問", options=options, answer="A", explanation="テスト解説"
         )
 
         with pytest.raises((ValidationError, TypeError)):
-            question.content = "変更された質問"
+            question.question = "変更された質問"
 
     def test_with_dictionary_options(self):
         """辞書形式のoptionsでも作成できることを確認"""
         question = Question(
-            content="テスト質問",
+            question="テスト質問",
             options={"A": "選択肢A", "B": "選択肢B", "C": "選択肢C", "D": "選択肢D"},
             answer="A",
             explanation="テスト解説",
@@ -262,7 +262,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 6)  # 5問
         ]
@@ -270,8 +270,8 @@ class TestQuiz:
         quiz = Quiz(questions=questions)
 
         assert len(quiz.questions) == 5
-        assert quiz.questions[0].content == "質問1"
-        assert quiz.questions[4].content == "質問5"
+        assert quiz.questions[0].question == "質問1"
+        assert quiz.questions[4].question == "質問5"
 
     def test_minimum_questions(self):
         """最小問題数(3問)のQuizを作成できることを確認"""
@@ -279,7 +279,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 4)  # 3問（最小値）
         ]
@@ -288,18 +288,18 @@ class TestQuiz:
         assert len(quiz.questions) == 3
 
     def test_maximum_questions(self):
-        """最大問題数(20問)のQuizを作成できることを確認"""
+        """最大問題数(10問)のQuizを作成できることを確認"""
         options = Options(A="選択肢A", B="選択肢B", C="選択肢C", D="選択肢D")
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
-            for i in range(1, 21)  # 20問（最大値）
+            for i in range(1, 11)  # 10問（最大値）
         ]
 
         quiz = Quiz(questions=questions)
-        assert len(quiz.questions) == 20
+        assert len(quiz.questions) == 10
 
     def test_too_few_questions(self):
         """問題数が少なすぎる場合にエラーになることを確認"""
@@ -307,7 +307,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 3)  # 2問（最小は3問）
         ]
@@ -323,15 +323,15 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
-            for i in range(1, 22)  # 21問（最大は20問）
+            for i in range(1, 12)  # 11問（最大は10問）
         ]
 
         with pytest.raises(ValidationError) as exc_info:
             Quiz(questions=questions)
 
-        assert "max_length" in str(exc_info.value).lower() or "20" in str(
+        assert "max_length" in str(exc_info.value).lower() or "10" in str(
             exc_info.value
         )
 
@@ -341,7 +341,7 @@ class TestQuiz:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 6)
         ]
@@ -359,7 +359,7 @@ class TestQuizResponse:
         # DomainQuestionの作成
         domain_questions = [
             DomainQuestion(
-                content=f"ドメイン質問{i}",
+                question=f"ドメイン質問{i}",
                 options={"A": "選択A", "B": "選択B", "C": "選択C", "D": "選択D"},
                 answer="A",
                 explanation=f"ドメイン解説{i}",
@@ -407,7 +407,7 @@ class TestUserAnswer:
 
         questions = [
             Question(
-                content=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
+                question=f"質問{i}", options=options, answer="A", explanation=f"解説{i}"
             )
             for i in range(1, 6)  # 5問
         ]
