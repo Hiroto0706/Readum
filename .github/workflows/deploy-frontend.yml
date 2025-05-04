@@ -60,3 +60,7 @@ jobs:
           gcloud run services update readum-frontend \
             --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/readum-repo/readum-frontend:${{ github.sha }} \
             --region ${{ vars.GCP_REGION }}
+
+          gcloud run services update-traffic readum-frontend \
+            --region ${{ vars.GCP_REGION }} \
+            --to-latest

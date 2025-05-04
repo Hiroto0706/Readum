@@ -24,15 +24,15 @@ resource "google_project_iam_member" "deploy_service_account_iam" {
   member = "serviceAccount:${google_service_account.deploy_service_account.email}"
 }
 
-# ネットワークモジュール
-module "networking" {
-  source = "./modules/networking"
+# # ネットワークモジュール
+# module "networking" {
+#   source = "./modules/networking"
 
-  project_id     = var.project_id
-  region         = var.region
-  network_name   = var.network_name
-  connector_name = var.connector_name
-}
+#   project_id     = var.project_id
+#   region         = var.region
+#   network_name   = var.network_name
+#   connector_name = var.connector_name
+# }
 
 # Storageモジュール
 module "storage" {
@@ -54,7 +54,8 @@ module "cloudrun" {
   frontend_service_name = var.frontend_service_name
   backend_service_name  = var.backend_service_name
   service_account_email = data.google_service_account.service_account.email
-  vpc_connector_id      = module.networking.vpc_connector_id
+  # vpc_connector_id      = module.networking.vpc_connector_id
+
 
   # 環境変数
   # フロントエンド環境変数
@@ -72,7 +73,7 @@ module "cloudrun" {
   additional_env_vars   = var.additional_env_vars
 
   depends_on = [
-    module.networking,
+    # module.networking,
     module.storage,
   ]
 }
