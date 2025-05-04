@@ -8,10 +8,10 @@ output "backend_url" {
   value       = module.cloudrun.backend_url
 }
 
-output "vpc_connector_id" {
-  description = "VPCアクセスコネクタのID"
-  value       = module.networking.vpc_connector_id
-}
+# output "vpc_connector_id" {
+#   description = "VPCアクセスコネクタのID"
+#   value       = module.networking.vpc_connector_id
+# }
 
 output "storage_bucket_url" {
   description = "ストレージバケットのURL"
