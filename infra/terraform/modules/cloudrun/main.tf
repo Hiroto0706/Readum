@@ -162,5 +162,5 @@ resource "google_cloud_run_v2_service_iam_member" "backend_access" {
   name     = google_cloud_run_v2_service.readum_backend.name
   location = google_cloud_run_v2_service.readum_backend.location
   role     = "roles/run.invoker"
-  member   = "serviceAccount:${var.service_account_email}"
+  member   = "allUsers"
 }
