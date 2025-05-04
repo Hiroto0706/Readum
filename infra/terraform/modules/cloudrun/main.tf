@@ -53,10 +53,10 @@ resource "google_cloud_run_v2_service" "readum_frontend" {
       }
     }
 
-    vpc_access {
-      connector = var.vpc_connector_id
-      egress    = "ALL_TRAFFIC"
-    }
+    # vpc_access {
+    #   connector = var.vpc_connector_id
+    #   egress    = "ALL_TRAFFIC"
+    # }
 
     # サービスアカウント
     service_account = var.service_account_email
@@ -77,7 +77,7 @@ resource "google_cloud_run_v2_service_iam_member" "frontend_access" {
 resource "google_cloud_run_v2_service" "readum_backend" {
   name     = var.backend_service_name
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY" # VPC内部からのアクセスのみ許可
+  # ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY" # VPC内部からのアクセスのみ許可
 
   lifecycle {
     ignore_changes = [
@@ -147,10 +147,10 @@ resource "google_cloud_run_v2_service" "readum_backend" {
       }
     }
 
-    vpc_access {
-      connector = var.vpc_connector_id
-      egress    = "ALL_TRAFFIC"
-    }
+    # vpc_access {
+    #   connector = var.vpc_connector_id
+    #   egress    = "ALL_TRAFFIC"
+    # }
 
     # サービスアカウント
     service_account = var.service_account_email
@@ -162,5 +162,5 @@ resource "google_cloud_run_v2_service_iam_member" "backend_access" {
   name     = google_cloud_run_v2_service.readum_backend.name
   location = google_cloud_run_v2_service.readum_backend.location
   role     = "roles/run.invoker"
-  member   = "allUsers"
+  member   = "serviceAccount:${var.service_account_email}"
 }

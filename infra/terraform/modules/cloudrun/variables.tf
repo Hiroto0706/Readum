@@ -23,10 +23,10 @@ variable "service_account_email" {
   type        = string
 }
 
-variable "vpc_connector_id" {
-  description = "VPCアクセスコネクタのID"
-  type        = string
-}
+# variable "vpc_connector_id" {
+#   description = "VPCアクセスコネクタのID"
+#   type        = string
+# }
 
 ###########################################################
 # 環境変数の設定
