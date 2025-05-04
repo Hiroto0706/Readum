@@ -78,6 +78,7 @@ resource "google_cloud_run_v2_service" "readum_backend" {
   name     = var.backend_service_name
   location = var.region
   # ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY" # VPC内部からのアクセスのみ許可
+  ingress = "INGRESS_TRAFFIC_ALL" # すべてのトラフィックを許可
 
   lifecycle {
     ignore_changes = [
